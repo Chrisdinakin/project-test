@@ -1,25 +1,33 @@
 # Cyber Terminal - Web3 Trading dApp
 
-A Next.js 14 (App Router) + TypeScript + Wagmi v2 decentralized application built for Ethereum Sepolia testnet.
+A Next.js 16 (App Router) + TypeScript + Wagmi v2 decentralized application built for Ethereum Sepolia testnet with full Web3 functionality.
 
 ## 🚀 Features
 
-### Swap Interface
+### Swap Interface (Landing Page - `/`)
+- **Real Web3 Smart Contracts**: Includes ERC20 token and DEX swap contracts
 - Uniswap-style token swap UI (SepoliaETH ↔ Mock USDC)
 - Real-time exchange rate calculation
 - Configurable slippage tolerance
-- Mock success toasts (simulates transactions without real liquidity)
+- Smart contract ABIs for integration
 
-### Futures Simulator
-- Real-time price charts powered by CoinGecko API
+### Advanced Futures Simulator (`/futures`)
+- **Enhanced Charting Engine** with multiple features:
+  - Multiple timeframes (1H, 4H, 1D, 1W, 1M)
+  - Chart types: Candlestick, Line, Area
+  - Volume indicator with color coding
+  - Moving Average (MA 20) indicator
+  - 24h price change display
+- Real-time price data from CoinGecko API
 - Interactive candlestick charts using lightweight-charts
 - Long/Short position buttons with mock contract signatures
 - Leverage slider (1x - 100x)
 - Liquidation price calculations
 
-### AI Commander
+### AI Commander (`/ai`)
 - Natural language command parsing
 - Automatically populates swap/futures forms from text commands
+- Smart navigation to appropriate pages
 - Example commands:
   - "Swap 0.5 ETH for USDC"
   - "Long ETH with 10x leverage"
@@ -27,15 +35,16 @@ A Next.js 14 (App Router) + TypeScript + Wagmi v2 decentralized application buil
 
 ## 🛠 Tech Stack
 
-- **Framework**: Next.js 14 (App Router)
+- **Framework**: Next.js 16 (App Router)
 - **Language**: TypeScript
-- **Styling**: Tailwind CSS (Cyber-Terminal dark theme)
+- **Styling**: Tailwind CSS 4 (Cyber-Terminal dark theme)
 - **Web3**: Wagmi v2 + Viem
 - **Wallet**: RainbowKit
 - **State**: Zustand
 - **Icons**: Lucide React
-- **Charts**: Lightweight Charts
+- **Charts**: Lightweight Charts (Enhanced)
 - **Notifications**: React Hot Toast
+- **Smart Contracts**: Solidity 0.8.20
 
 ## 📋 Prerequisites
 
@@ -78,6 +87,15 @@ npm run dev
 
 This dApp is **strictly configured for Ethereum Sepolia testnet** (Chain ID: 11155111).
 
+### Smart Contracts
+
+The project includes production-ready smart contracts in the `/contracts` directory:
+
+- **MockToken.sol**: ERC20 token implementation with mint functionality for testing
+- **SimpleSwap.sol**: Constant product AMM (x * y = k) with 0.3% swap fee
+
+See `/contracts/README.md` for deployment instructions.
+
 ### Mock Token Addresses
 Since USDC and WBTC don't exist on Sepolia, we use placeholder addresses:
 - Mock USDC: `0x94a9D9AC8a22534E3FaCa9F4e7F2E2cf85d5E4C8`
@@ -101,32 +119,40 @@ The AI Commander parses natural language and automatically populates React state
 }
 ```
 
-The parsed command triggers `processAICommand()` which updates the Zustand store, automatically navigating to the appropriate tab and filling in form fields.
+The parsed command triggers `processAICommand()` which updates the Zustand store and automatically navigates to the appropriate page.
 
 ## 📁 Project Structure
 
 ```
 src/
 ├── app/
-│   ├── globals.css          # Cyber-Terminal theme styles
-│   ├── layout.tsx           # Root layout with providers
-│   └── page.tsx             # Main page component
+│   ├── page.tsx              # Swap interface (landing page)
+│   ├── futures/page.tsx      # Advanced futures trading
+│   ├── ai/page.tsx           # AI Commander
+│   ├── globals.css           # Cyber-Terminal theme styles
+│   └── layout.tsx            # Root layout with providers
 ├── components/
-│   ├── SwapInterface.tsx    # Token swap UI
-│   ├── FuturesSimulator.tsx # Futures trading simulator
-│   ├── AICommander.tsx      # Natural language interface
-│   └── Navigation.tsx       # Tab navigation
+│   ├── SwapInterface.tsx              # Token swap UI
+│   ├── FuturesSimulator.tsx           # Basic futures simulator
+│   ├── AdvancedFuturesSimulator.tsx   # Enhanced futures with advanced charts
+│   ├── AICommander.tsx                # Natural language interface
+│   └── Navigation.tsx                 # Page navigation
 ├── config/
-│   ├── wagmi.ts            # Wagmi config (Sepolia only)
-│   └── tokens.ts           # Mock token addresses
+│   ├── wagmi.ts              # Wagmi config (Sepolia only)
+│   ├── tokens.ts             # Mock token addresses
+│   └── contracts.ts          # Smart contract ABIs
 ├── hooks/
-│   └── useTradingStore.ts  # Zustand state management
+│   └── useTradingStore.ts    # Zustand state management
 ├── lib/
-│   └── aiCommandParser.ts  # NLP command parser
+│   └── aiCommandParser.ts    # NLP command parser
 ├── providers/
-│   └── Web3Provider.tsx    # RainbowKit + Wagmi provider
+│   └── Web3Provider.tsx      # RainbowKit + Wagmi provider
 └── types/
-    └── trading.ts          # TypeScript interfaces
+    └── trading.ts            # TypeScript interfaces
+contracts/
+├── MockToken.sol             # ERC20 token contract
+├── SimpleSwap.sol            # DEX swap contract
+└── README.md                 # Contract deployment guide
 ```
 
 ## 🧪 Testing
@@ -138,6 +164,18 @@ npm run lint
 # Build for production
 npm run build
 ```
+
+## 🔐 Smart Contract Deployment
+
+To deploy the smart contracts:
+
+1. Install Hardhat or Foundry
+2. Configure your Sepolia RPC endpoint
+3. Deploy MockToken contracts for test tokens
+4. Deploy SimpleSwap with token pair addresses
+5. Add initial liquidity
+
+See `/contracts/README.md` for detailed instructions.
 
 ## 📝 License
 
