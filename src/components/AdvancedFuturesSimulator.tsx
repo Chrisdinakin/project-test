@@ -22,6 +22,8 @@ const MOCK_DATA_CONFIG = {
   VOLATILITY_FACTOR: 0.02,
   MIN_PRICE_RATIO: 0.8,
   CHART_HOURS: 168,
+  VOLUME_BASE: 500000,
+  VOLUME_VARIATION: 1000000,
 };
 
 // API configuration
@@ -104,7 +106,7 @@ export function AdvancedFuturesSimulator() {
         // Generate volume data
         const volumes: VolumeData[] = formattedData.map((d, i) => ({
           time: d.time,
-          value: Math.random() * 1000000 + 500000,
+          value: Math.random() * MOCK_DATA_CONFIG.VOLUME_VARIATION + MOCK_DATA_CONFIG.VOLUME_BASE,
           color: i > 0 && d.close >= formattedData[i - 1].close ? '#22c55e' : '#ef4444',
         }));
         
@@ -115,6 +117,7 @@ export function AdvancedFuturesSimulator() {
           const latest = formattedData[formattedData.length - 1].close;
           const first = formattedData[0].close;
           setCurrentPrice(latest);
+          // Note: Price change is calculated for the selected timeframe period, not strictly 24h
           setPriceChange24h(((latest - first) / first) * 100);
           setFuturesForm({ entryPrice: latest.toString() });
         }
@@ -123,7 +126,7 @@ export function AdvancedFuturesSimulator() {
         const mockData = generateMockPriceData(futuresForm.asset);
         const volumes: VolumeData[] = mockData.map((d, i) => ({
           time: d.time,
-          value: Math.random() * 1000000 + 500000,
+          value: Math.random() * MOCK_DATA_CONFIG.VOLUME_VARIATION + MOCK_DATA_CONFIG.VOLUME_BASE,
           color: i > 0 && d.close >= mockData[i - 1].close ? '#22c55e' : '#ef4444',
         }));
         setPriceData(mockData);

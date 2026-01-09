@@ -61,18 +61,16 @@ export function AICommander() {
     
     addChatMessage(assistantMessage);
     
-    // If command was parsed successfully, populate the form and navigate
+    // If command was parsed successfully, populate the form
     if (commandResult.parsedSuccessfully) {
       processAICommand(commandResult);
       
-      // Navigate to the appropriate page after a short delay
-      setTimeout(() => {
-        if (commandResult.action === 'swap') {
-          router.push('/');
-        } else if (commandResult.action === 'futures') {
-          router.push('/futures');
-        }
-      }, 1000);
+      // Navigate immediately after processing
+      if (commandResult.action === 'swap') {
+        router.push('/');
+      } else if (commandResult.action === 'futures') {
+        router.push('/futures');
+      }
     }
     
     setIsProcessing(false);

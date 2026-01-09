@@ -76,21 +76,25 @@ contract SimpleSwap {
             require(amountOut >= minAmountOut, "Insufficient output amount");
             require(amountOut <= reserveB, "Insufficient liquidity");
 
-            IERC20(tokenA).transferFrom(msg.sender, address(this), amountIn);
-            IERC20(tokenB).transfer(msg.sender, amountOut);
-
+            // Update reserves BEFORE external calls (checks-effects-interactions pattern)
             reserveA += amountIn;
             reserveB -= amountOut;
+
+            // External calls after state updates
+            IERC20(tokenA).transferFrom(msg.sender, address(this), amountIn);
+            IERC20(tokenB).transfer(msg.sender, amountOut);
         } else {
             amountOut = (amountInWithFee * reserveA) / (reserveB + amountInWithFee);
             require(amountOut >= minAmountOut, "Insufficient output amount");
             require(amountOut <= reserveA, "Insufficient liquidity");
 
-            IERC20(tokenB).transferFrom(msg.sender, address(this), amountIn);
-            IERC20(tokenA).transfer(msg.sender, amountOut);
-
+            // Update reserves BEFORE external calls (checks-effects-interactions pattern)
             reserveB += amountIn;
             reserveA -= amountOut;
+
+            // External calls after state updates
+            IERC20(tokenB).transferFrom(msg.sender, address(this), amountIn);
+            IERC20(tokenA).transfer(msg.sender, amountOut);
         }
 
         emit Swap(msg.sender, tokenIn, tokenOut, amountIn, amountOut);
