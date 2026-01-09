@@ -1,0 +1,84 @@
+'use client';
+
+import { create } from 'zustand';
+import type { SwapFormState, FuturesFormState, AICommandResult, ChatMessage } from '@/types/trading';
+
+interface TradingStore {
+  // Swap form state
+  swapForm: SwapFormState;
+  setSwapForm: (form: Partial<SwapFormState>) => void;
+  resetSwapForm: () => void;
+  
+  // Futures form state
+  futuresForm: FuturesFormState;
+  setFuturesForm: (form: Partial<FuturesFormState>) => void;
+  resetFuturesForm: () => void;
+  
+  // AI Commander chat history
+  chatMessages: ChatMessage[];
+  addChatMessage: (message: ChatMessage) => void;
+  clearChatMessages: () => void;
+  
+  // Process AI command result to populate forms
+  processAICommand: (result: AICommandResult) => void;
+  
+  // Active tab for navigation
+  activeTab: 'swap' | 'futures' | 'ai';
+  setActiveTab: (tab: 'swap' | 'futures' | 'ai') => void;
+}
+
+const defaultSwapForm: SwapFormState = {
+  fromToken: 'ETH',
+  toToken: 'USDC',
+  fromAmount: '',
+  toAmount: '',
+  slippage: 0.5,
+};
+
+const defaultFuturesForm: FuturesFormState = {
+  asset: 'ETH',
+  position: 'long',
+  leverage: 1,
+  size: '',
+  entryPrice: '',
+};
+
+export const useTradingStore = create<TradingStore>((set, get) => ({
+  // Swap form
+  swapForm: defaultSwapForm,
+  setSwapForm: (form) => set((state) => ({ 
+    swapForm: { ...state.swapForm, ...form } 
+  })),
+  resetSwapForm: () => set({ swapForm: defaultSwapForm }),
+  
+  // Futures form
+  futuresForm: defaultFuturesForm,
+  setFuturesForm: (form) => set((state) => ({ 
+    futuresForm: { ...state.futuresForm, ...form } 
+  })),
+  resetFuturesForm: () => set({ futuresForm: defaultFuturesForm }),
+  
+  // Chat messages
+  chatMessages: [],
+  addChatMessage: (message) => set((state) => ({ 
+    chatMessages: [...state.chatMessages, message] 
+  })),
+  clearChatMessages: () => set({ chatMessages: [] }),
+  
+  // Process AI command and populate appropriate form
+  processAICommand: (result) => {
+    const { setSwapForm, setFuturesForm, setActiveTab } = get();
+    
+    if (result.action === 'swap' && result.swapData) {
+      setSwapForm(result.swapData);
+      setActiveTab('swap');
+    } else if (result.action === 'futures' && result.futuresData) {
+      setFuturesForm(result.futuresData);
+      setActiveTab('futures');
+    }
+  },
+  
+  // Active tab
+  activeTab: 'swap',
+  setActiveTab: (tab) => set({ activeTab: tab }),
+}));
