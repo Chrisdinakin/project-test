@@ -7,8 +7,10 @@ import { formatEther } from 'viem';
 import toast from 'react-hot-toast';
 import { useTradingStore } from '@/hooks/useTradingStore';
 
-// Mock exchange rate: 1 ETH = 2000 USDC
-const MOCK_ETH_PRICE = 2000;
+// Mock exchange rate for demonstration purposes
+// In production, this would be fetched from a price oracle or DEX
+// Note: This is a static mock value since Sepolia has no real liquidity pools
+const MOCK_ETH_PRICE_USD = 2000;
 
 export function SwapInterface() {
   const { address, isConnected } = useAccount();
@@ -26,9 +28,9 @@ export function SwapInterface() {
       let outputAmount: number;
       
       if (swapForm.fromToken === 'ETH') {
-        outputAmount = inputAmount * MOCK_ETH_PRICE;
+        outputAmount = inputAmount * MOCK_ETH_PRICE_USD;
       } else {
-        outputAmount = inputAmount / MOCK_ETH_PRICE;
+        outputAmount = inputAmount / MOCK_ETH_PRICE_USD;
       }
       
       // Apply slippage
@@ -222,7 +224,7 @@ export function SwapInterface() {
             <div className="flex justify-between text-sm font-mono">
               <span className="text-zinc-400">Rate</span>
               <span className="text-zinc-300">
-                1 ETH = {MOCK_ETH_PRICE.toLocaleString()} USDC
+                1 ETH = {MOCK_ETH_PRICE_USD.toLocaleString()} USDC
               </span>
             </div>
             <div className="flex justify-between text-sm font-mono mt-1">

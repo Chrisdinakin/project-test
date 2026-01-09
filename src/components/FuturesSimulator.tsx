@@ -7,6 +7,18 @@ import toast from 'react-hot-toast';
 import { useTradingStore } from '@/hooks/useTradingStore';
 import type { PriceData } from '@/types/trading';
 
+// Configuration constants for mock data generation
+const MOCK_DATA_CONFIG = {
+  ETH_BASE_PRICE: 2000,     // Base ETH price in USD
+  BTC_BASE_PRICE: 45000,    // Base BTC price in USD
+  VOLATILITY_FACTOR: 0.02,  // 2% volatility per candle
+  MIN_PRICE_RATIO: 0.8,     // Price won't go below 80% of base
+  CHART_HOURS: 168,         // 7 days * 24 hours of data points
+};
+
+// API configuration
+const COINGECKO_API_TIMEOUT_MS = 10000; // 10 second timeout
+
 export function FuturesSimulator() {
   const { isConnected } = useAccount();
   const { signMessageAsync } = useSignMessage();
@@ -19,15 +31,23 @@ export function FuturesSimulator() {
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<ReturnType<typeof import('lightweight-charts').createChart> | null>(null);
   
-  // Fetch price data from CoinGecko
+  // Fetch price data from CoinGecko with timeout
   useEffect(() => {
     const fetchPriceData = async () => {
       setIsChartLoading(true);
+      
+      // Create abort controller for timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), COINGECKO_API_TIMEOUT_MS);
+      
       try {
         const coinId = futuresForm.asset === 'ETH' ? 'ethereum' : 'bitcoin';
         const response = await fetch(
-          `https://api.coingecko.com/api/v3/coins/${coinId}/ohlc?vs_currency=usd&days=7`
+          `https://api.coingecko.com/api/v3/coins/${coinId}/ohlc?vs_currency=usd&days=7`,
+          { signal: controller.signal }
         );
+        
+        clearTimeout(timeoutId);
         
         if (!response.ok) throw new Error('Failed to fetch price data');
         
@@ -377,19 +397,21 @@ Entry Price: $${currentPrice?.toLocaleString() || 'N/A'}`,
   );
 }
 
-// Generate mock price data as fallback
+// Generate mock price data as fallback when API is unavailable
 function generateMockPriceData(asset: 'ETH' | 'BTC'): PriceData[] {
   type UTCTimestamp = import('lightweight-charts').UTCTimestamp;
-  const basePrice = asset === 'ETH' ? 2000 : 45000;
+  const { ETH_BASE_PRICE, BTC_BASE_PRICE, VOLATILITY_FACTOR, MIN_PRICE_RATIO, CHART_HOURS } = MOCK_DATA_CONFIG;
+  
+  const basePrice = asset === 'ETH' ? ETH_BASE_PRICE : BTC_BASE_PRICE;
   const data: PriceData[] = [];
   const now = Math.floor(Date.now() / 1000);
   const hourInSeconds = 3600;
   
   let price = basePrice;
-  for (let i = 168; i >= 0; i--) { // 7 days * 24 hours
-    const volatility = basePrice * 0.02;
+  for (let i = CHART_HOURS; i >= 0; i--) {
+    const volatility = basePrice * VOLATILITY_FACTOR;
     const change = (Math.random() - 0.5) * volatility;
-    price = Math.max(price + change, basePrice * 0.8);
+    price = Math.max(price + change, basePrice * MIN_PRICE_RATIO);
     
     const open = price;
     const close = price + (Math.random() - 0.5) * volatility * 0.5;

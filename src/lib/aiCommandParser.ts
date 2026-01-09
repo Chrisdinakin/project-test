@@ -32,7 +32,12 @@ export function parseAICommand(command: string): AICommandResult {
 }
 
 function parseSwapCommand(command: string): AICommandResult {
-  // Pattern: "swap X ETH for USDC" or "swap X USDC for ETH" or "exchange X ETH to USDC"
+  // Regex patterns for swap commands:
+  // Pattern 1: Matches "swap/exchange/convert/trade X ETH for/to/into USDC" 
+  //   - Captures: amount, from-token, to-token
+  //   - Supports "sepolia eth" as alternative to "eth"
+  // Pattern 2: Matches "buy/get X USDC with/using ETH"
+  //   - Note: Tokens are swapped since "buy USDC with ETH" means "swap ETH for USDC"
   const swapPatterns = [
     /(?:swap|exchange|convert|trade)\s+([\d.]+)\s*(eth|sepolia\s*eth|usdc)\s+(?:for|to|into)\s*(eth|sepolia\s*eth|usdc)/i,
     /(?:buy|get)\s+([\d.]+)\s*(usdc|eth)\s+(?:with|using)\s*(eth|usdc)/i,
@@ -76,7 +81,14 @@ function parseSwapCommand(command: string): AICommandResult {
 }
 
 function parseFuturesCommand(command: string): AICommandResult {
-  // Pattern: "long/short ETH/BTC with Xx leverage" or "open long/short position on ETH"
+  // Regex patterns for futures/position commands:
+  // Pattern 1: "long/short ETH/BTC [with Xx leverage]"
+  //   - Captures: position (long/short), asset (eth/btc), optional leverage
+  //   - Supports full names "bitcoin" and "ethereum"
+  // Pattern 2: "open/create [a] long/short [position] [on] ETH/BTC"
+  //   - More natural language style
+  // Pattern 3: "ETH/BTC long/short [Xx]"
+  //   - Reversed order: asset first, then position
   const futuresPatterns = [
     /(long|short)\s+(eth|btc|bitcoin|ethereum)(?:\s+(?:with|at))?\s*(?:([\d.]+)\s*x?\s*(?:leverage)?)?/i,
     /(?:open|create)\s+(?:a\s+)?(long|short)\s+(?:position\s+)?(?:on\s+)?(eth|btc|bitcoin|ethereum)/i,

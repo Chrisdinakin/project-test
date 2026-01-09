@@ -1,12 +1,14 @@
 // Mock Token Addresses for Sepolia Testnet
-// These are placeholder addresses since actual USDC/WBTC don't exist on Sepolia
+// ⚠️ WARNING: These are placeholder addresses only!
+// These tokens are NOT deployed on Sepolia and will NOT work for actual transactions.
+// They are used for UI demonstration purposes only.
 
 export const MOCK_TOKENS = {
-  // Mock USDC address on Sepolia (placeholder)
+  // Mock USDC address on Sepolia (placeholder - not a real contract)
   USDC: '0x94a9D9AC8a22534E3FaCa9F4e7F2E2cf85d5E4C8' as `0x${string}`,
-  // Mock WBTC address on Sepolia (placeholder)
+  // Mock WBTC address on Sepolia (placeholder - not a real contract)
   WBTC: '0xC558DBdd856501FCd9aaF1E62eae57A9F0629a3c' as `0x${string}`,
-  // Native SepoliaETH (wrapped)
+  // Native SepoliaETH (wrapped) - this is a real Sepolia WETH address
   WETH: '0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14' as `0x${string}`,
 } as const;
 
