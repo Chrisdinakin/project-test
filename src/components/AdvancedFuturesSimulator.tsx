@@ -67,7 +67,7 @@ export function AdvancedFuturesSimulator() {
   const [chartType, setChartType] = useState<'candlestick' | 'line' | 'area'>('candlestick');
   const [showVolume, setShowVolume] = useState(true);
   const [showMA, setShowMA] = useState(false);
-  const [priceChange24h, setPriceChange24h] = useState<number>(0);
+  const [priceChange, setPriceChange] = useState<number>(0);
   
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
@@ -117,8 +117,8 @@ export function AdvancedFuturesSimulator() {
           const latest = formattedData[formattedData.length - 1].close;
           const first = formattedData[0].close;
           setCurrentPrice(latest);
-          // Note: Price change is calculated for the selected timeframe period, not strictly 24h
-          setPriceChange24h(((latest - first) / first) * 100);
+          // Calculate price change for the selected timeframe period
+          setPriceChange(((latest - first) / first) * 100);
           setFuturesForm({ entryPrice: latest.toString() });
         }
       } catch (error) {
@@ -357,9 +357,9 @@ Entry Price: $${currentPrice?.toLocaleString() || 'N/A'}`,
                 </span>
               </div>
               <div className={`text-sm font-mono px-2 py-1 rounded ${
-                priceChange24h >= 0 ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
+                priceChange >= 0 ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
               }`}>
-                {priceChange24h >= 0 ? '+' : ''}{priceChange24h.toFixed(2)}%
+                {priceChange >= 0 ? '+' : ''}{priceChange.toFixed(2)}%
               </div>
             </div>
           )}
