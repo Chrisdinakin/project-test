@@ -21,10 +21,6 @@ interface TradingStore {
   
   // Process AI command result to populate forms
   processAICommand: (result: AICommandResult) => void;
-  
-  // Active tab for navigation
-  activeTab: 'swap' | 'futures' | 'ai';
-  setActiveTab: (tab: 'swap' | 'futures' | 'ai') => void;
 }
 
 const defaultSwapForm: SwapFormState = {
@@ -66,19 +62,15 @@ export const useTradingStore = create<TradingStore>((set, get) => ({
   clearChatMessages: () => set({ chatMessages: [] }),
   
   // Process AI command and populate appropriate form
+  // Note: Navigation is now handled by the AI Commander component
+  // using Next.js router.push instead of activeTab state
   processAICommand: (result) => {
-    const { setSwapForm, setFuturesForm, setActiveTab } = get();
+    const { setSwapForm, setFuturesForm } = get();
     
     if (result.action === 'swap' && result.swapData) {
       setSwapForm(result.swapData);
-      setActiveTab('swap');
     } else if (result.action === 'futures' && result.futuresData) {
       setFuturesForm(result.futuresData);
-      setActiveTab('futures');
     }
   },
-  
-  // Active tab
-  activeTab: 'swap',
-  setActiveTab: (tab) => set({ activeTab: tab }),
 }));

@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { Send, Bot, User, Terminal, Sparkles, Trash2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useTradingStore } from '@/hooks/useTradingStore';
 import { parseAICommand, generateAIResponse } from '@/lib/aiCommandParser';
 import type { ChatMessage } from '@/types/trading';
@@ -10,6 +11,7 @@ export function AICommander() {
   const [input, setInput] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
   
   const { chatMessages, addChatMessage, clearChatMessages, processAICommand } = useTradingStore();
   
@@ -39,8 +41,15 @@ export function AICommander() {
     // Parse the command
     const commandResult = parseAICommand(userMessage.content);
     
-    // Generate response
-    const responseContent = generateAIResponse(commandResult);
+    // Generate response with updated navigation message
+    let responseContent = generateAIResponse(commandResult);
+    if (commandResult.parsedSuccessfully) {
+      if (commandResult.action === 'swap') {
+        responseContent = responseContent.replace('Switch to the Swap tab', 'Navigate to the Swap page');
+      } else if (commandResult.action === 'futures') {
+        responseContent = responseContent.replace('Switch to the Futures tab', 'Navigate to the Futures page');
+      }
+    }
     
     const assistantMessage: ChatMessage = {
       id: (Date.now() + 1).toString(),
@@ -55,6 +64,13 @@ export function AICommander() {
     // If command was parsed successfully, populate the form
     if (commandResult.parsedSuccessfully) {
       processAICommand(commandResult);
+      
+      // Navigate immediately after processing
+      if (commandResult.action === 'swap') {
+        router.push('/');
+      } else if (commandResult.action === 'futures') {
+        router.push('/futures');
+      }
     }
     
     setIsProcessing(false);
@@ -153,7 +169,7 @@ export function AICommander() {
                     {message.commandResult && message.commandResult.parsedSuccessfully && (
                       <div className="mt-2 pt-2 border-t border-zinc-700">
                         <span className="text-xs text-green-400">
-                          ✓ Form populated - Check the {message.commandResult.action} tab
+                          ✓ Form populated - Navigating to {message.commandResult.action} page...
                         </span>
                       </div>
                     )}

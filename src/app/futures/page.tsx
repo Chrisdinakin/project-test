@@ -3,10 +3,10 @@
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useAccount, useChainId } from 'wagmi';
 import { AlertTriangle } from 'lucide-react';
-import { SwapInterface, Navigation, Header } from '@/components';
+import { AdvancedFuturesSimulator, Navigation, Header } from '@/components';
 import { SEPOLIA_CHAIN_ID } from '@/config/wagmi';
 
-export default function Home() {
+export default function FuturesPage() {
   const { isConnected } = useAccount();
   const chainId = useChainId();
   
@@ -42,9 +42,9 @@ export default function Home() {
           <Navigation />
         </div>
         
-        {/* Main Content - Swap Interface */}
+        {/* Main Content - Futures Trading */}
         <main className="pb-16">
-          <SwapInterface />
+          <AdvancedFuturesSimulator />
         </main>
         
         {/* Footer */}
