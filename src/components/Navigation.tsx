@@ -1,33 +1,37 @@
 'use client';
 
 import { ArrowLeftRight, BarChart3, Terminal, Zap } from 'lucide-react';
-import { useTradingStore } from '@/hooks/useTradingStore';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 export function Navigation() {
-  const { activeTab, setActiveTab } = useTradingStore();
+  const pathname = usePathname();
   
   const tabs = [
-    { id: 'swap' as const, label: 'SWAP', icon: ArrowLeftRight },
-    { id: 'futures' as const, label: 'FUTURES', icon: BarChart3 },
-    { id: 'ai' as const, label: 'AI CMD', icon: Terminal },
+    { id: '/', label: 'SWAP', icon: ArrowLeftRight },
+    { id: '/futures', label: 'FUTURES', icon: BarChart3 },
+    { id: '/ai', label: 'AI CMD', icon: Terminal },
   ];
   
   return (
     <nav className="flex items-center justify-center gap-2 p-2 bg-zinc-900/50 rounded-xl border border-cyan-500/20 backdrop-blur-sm">
-      {tabs.map(({ id, label, icon: Icon }) => (
-        <button
-          key={id}
-          onClick={() => setActiveTab(id)}
-          className={`flex items-center gap-2 px-6 py-3 rounded-lg font-mono font-bold text-sm transition-all ${
-            activeTab === id
-              ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500 shadow-lg shadow-cyan-500/20'
-              : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 border border-transparent'
-          }`}
-        >
-          <Icon className="w-4 h-4" />
-          {label}
-        </button>
-      ))}
+      {tabs.map(({ id, label, icon: Icon }) => {
+        const isActive = pathname === id;
+        return (
+          <Link
+            key={id}
+            href={id}
+            className={`flex items-center gap-2 px-6 py-3 rounded-lg font-mono font-bold text-sm transition-all ${
+              isActive
+                ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500 shadow-lg shadow-cyan-500/20'
+                : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 border border-transparent'
+            }`}
+          >
+            <Icon className="w-4 h-4" />
+            {label}
+          </Link>
+        );
+      })}
     </nav>
   );
 }
