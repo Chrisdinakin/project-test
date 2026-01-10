@@ -2,44 +2,86 @@
 
 import { useState, useEffect } from 'react';
 import { ArrowDownUp, Settings, Wallet, Loader2, CheckCircle } from 'lucide-react';
-import { useAccount, useBalance, useSignMessage } from 'wagmi';
-import { formatEther } from 'viem';
+import { useAccount, useBalance, useReadContract, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
+import { formatEther, parseEther } from 'viem';
 import toast from 'react-hot-toast';
 import { useTradingStore } from '@/hooks/useTradingStore';
-
-// Mock exchange rate for demonstration purposes
-// In production, this would be fetched from a price oracle or DEX
-// Note: This is a static mock value since Sepolia has no real liquidity pools
-const MOCK_ETH_PRICE_USD = 2000;
+import { DEPLOYED_CONTRACTS, SIMPLE_SWAP_ABI, MOCK_TOKEN_ABI } from '@/config/contracts';
+import { MOCK_TOKENS } from '@/config/tokens';
 
 export function SwapInterface() {
   const { address, isConnected } = useAccount();
   const { data: ethBalance } = useBalance({ address });
-  const { signMessageAsync } = useSignMessage();
   
   const { swapForm, setSwapForm } = useTradingStore();
   const [isSwapping, setIsSwapping] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   
-  // Calculate output amount based on input
+  // Read contract hooks
+  const { data: reserves } = useReadContract({
+    address: DEPLOYED_CONTRACTS.SIMPLE_SWAP,
+    abi: SIMPLE_SWAP_ABI,
+    functionName: 'getReserves',
+  });
+  
+  const { data: tkaBalance } = useReadContract({
+    address: DEPLOYED_CONTRACTS.TOKEN_A,
+    abi: MOCK_TOKEN_ABI,
+    functionName: 'balanceOf',
+    args: address ? [address] : undefined,
+  });
+  
+  const { data: tkbBalance } = useReadContract({
+    address: DEPLOYED_CONTRACTS.TOKEN_B,
+    abi: MOCK_TOKEN_ABI,
+    functionName: 'balanceOf',
+    args: address ? [address] : undefined,
+  });
+  
+  // Write contract hooks
+  const { data: hash, writeContract, isPending } = useWriteContract();
+  
+  const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
+    hash,
+  });
+  
+  const { swapForm, setSwapForm } = useTradingStore();
+  const [isSwapping, setIsSwapping] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  
+  // Calculate output amount based on reserves (constant product formula)
   useEffect(() => {
-    if (swapForm.fromAmount && !isNaN(parseFloat(swapForm.fromAmount))) {
+    if (swapForm.fromAmount && !isNaN(parseFloat(swapForm.fromAmount)) && reserves) {
       const inputAmount = parseFloat(swapForm.fromAmount);
+      const [reserveA, reserveB] = reserves as [bigint, bigint];
+      
       let outputAmount: number;
       
-      if (swapForm.fromToken === 'ETH') {
-        outputAmount = inputAmount * MOCK_ETH_PRICE_USD;
+      // Determine which direction we're swapping
+      const isTkaToTkb = swapForm.fromToken === 'TKA';
+      
+      // Simple AMM calculation: (amountIn * reserveOut) / (reserveIn + amountIn)
+      // With 0.3% fee: amountIn * 0.997
+      const amountInWei = BigInt(Math.floor(inputAmount * 1e18));
+      const amountInWithFee = (amountInWei * BigInt(997)) / BigInt(1000);
+      
+      if (isTkaToTkb) {
+        const numerator = amountInWithFee * reserveB;
+        const denominator = reserveA + amountInWithFee;
+        outputAmount = Number(numerator / denominator) / 1e18;
       } else {
-        outputAmount = inputAmount / MOCK_ETH_PRICE_USD;
+        const numerator = amountInWithFee * reserveA;
+        const denominator = reserveB + amountInWithFee;
+        outputAmount = Number(numerator / denominator) / 1e18;
       }
       
-      // Apply slippage
+      // Apply slippage tolerance
       outputAmount = outputAmount * (1 - swapForm.slippage / 100);
-      setSwapForm({ toAmount: outputAmount.toFixed(swapForm.toToken === 'USDC' ? 2 : 6) });
+      setSwapForm({ toAmount: outputAmount.toFixed(6) });
     } else {
       setSwapForm({ toAmount: '' });
     }
-  }, [swapForm.fromAmount, swapForm.fromToken, swapForm.toToken, swapForm.slippage, setSwapForm]);
+  }, [swapForm.fromAmount, swapForm.fromToken, swapForm.toToken, swapForm.slippage, reserves, setSwapForm]);
   
   const handleSwapTokens = () => {
     setSwapForm({
@@ -50,8 +92,31 @@ export function SwapInterface() {
     });
   };
   
+  const handleApprove = async () => {
+    if (!isConnected || !address) {
+      toast.error('Please connect your wallet first');
+      return;
+    }
+    
+    const tokenAddress = swapForm.fromToken === 'TKA' ? DEPLOYED_CONTRACTS.TOKEN_A : DEPLOYED_CONTRACTS.TOKEN_B;
+    const amount = parseEther(swapForm.fromAmount);
+    
+    try {
+      writeContract({
+        address: tokenAddress,
+        abi: MOCK_TOKEN_ABI,
+        functionName: 'approve',
+        args: [DEPLOYED_CONTRACTS.SIMPLE_SWAP, amount],
+      });
+      toast.success('Approval transaction submitted!');
+    } catch (error) {
+      toast.error('Approval failed');
+      console.error(error);
+    }
+  };
+  
   const handleSwap = async () => {
-    if (!isConnected) {
+    if (!isConnected || !address) {
       toast.error('Please connect your wallet first');
       return;
     }
@@ -61,15 +126,37 @@ export function SwapInterface() {
       return;
     }
     
+    if (!reserves || reserves[0] === BigInt(0) || reserves[1] === BigInt(0)) {
+      toast.error('No liquidity in pool. Please add liquidity first.');
+      return;
+    }
+    
     setIsSwapping(true);
     
     try {
-      // Mock swap by signing a message (simulates contract interaction)
-      await signMessageAsync({
-        message: `Mock Swap: ${swapForm.fromAmount} ${swapForm.fromToken} -> ${swapForm.toAmount} ${swapForm.toToken}`,
+      const tokenIn = swapForm.fromToken === 'TKA' ? DEPLOYED_CONTRACTS.TOKEN_A : DEPLOYED_CONTRACTS.TOKEN_B;
+      const amountIn = parseEther(swapForm.fromAmount);
+      const minAmountOut = parseEther(swapForm.toAmount);
+      
+      writeContract({
+        address: DEPLOYED_CONTRACTS.SIMPLE_SWAP,
+        abi: SIMPLE_SWAP_ABI,
+        functionName: 'swap',
+        args: [tokenIn, amountIn, minAmountOut],
       });
       
-      // Show success toast (mock success since there's no real liquidity)
+      toast.success('Swap transaction submitted!');
+    } catch (error) {
+      toast.error('Swap failed or was rejected');
+      console.error(error);
+    } finally {
+      setIsSwapping(false);
+    }
+  };
+  
+  // Show success message when transaction is confirmed
+  useEffect(() => {
+    if (isConfirmed) {
       toast.custom((t) => (
         <div
           className={`${
@@ -83,13 +170,10 @@ export function SwapInterface() {
               </div>
               <div className="ml-3 flex-1">
                 <p className="text-sm font-medium text-cyan-400">
-                  Swap Simulated Successfully!
+                  Transaction Confirmed!
                 </p>
                 <p className="mt-1 text-sm text-zinc-400">
                   {swapForm.fromAmount} {swapForm.fromToken} → {swapForm.toAmount} {swapForm.toToken}
-                </p>
-                <p className="mt-1 text-xs text-zinc-500">
-                  (Mock transaction - no actual liquidity on Sepolia)
                 </p>
               </div>
             </div>
@@ -97,14 +181,9 @@ export function SwapInterface() {
         </div>
       ), { duration: 5000 });
       
-      // Reset form after successful swap
       setSwapForm({ fromAmount: '', toAmount: '' });
-    } catch {
-      toast.error('Swap failed or was rejected');
-    } finally {
-      setIsSwapping(false);
     }
-  };
+  }, [isConfirmed, swapForm.fromAmount, swapForm.fromToken, swapForm.toAmount, swapForm.toToken, setSwapForm]);
   
   return (
     <div className="w-full max-w-md mx-auto">
@@ -157,9 +236,13 @@ export function SwapInterface() {
         <div className="bg-zinc-800/50 rounded-lg p-4 border border-zinc-700">
           <div className="flex justify-between mb-2">
             <span className="text-sm text-zinc-400 font-mono">From</span>
-            {isConnected && swapForm.fromToken === 'ETH' && ethBalance && (
+            {isConnected && (
               <span className="text-sm text-zinc-500 font-mono">
-                Balance: {parseFloat(formatEther(ethBalance.value)).toFixed(4)}
+                Balance: {swapForm.fromToken === 'TKA' && tkaBalance 
+                  ? (Number(tkaBalance) / 1e18).toFixed(4)
+                  : swapForm.fromToken === 'TKB' && tkbBalance
+                  ? (Number(tkbBalance) / 1e18).toFixed(4)
+                  : '0.0000'}
               </span>
             )}
           </div>
@@ -171,15 +254,26 @@ export function SwapInterface() {
               onChange={(e) => setSwapForm({ fromAmount: e.target.value })}
               className="flex-1 bg-transparent text-2xl text-white font-mono outline-none"
             />
-            <button
-              className="flex items-center gap-2 bg-zinc-700 px-4 py-2 rounded-lg hover:bg-zinc-600 transition-colors"
+            <select
+              value={swapForm.fromToken}
+              onChange={(e) => setSwapForm({ 
+                fromToken: e.target.value as 'TKA' | 'TKB',
+                toToken: e.target.value === 'TKA' ? 'TKB' : 'TKA'
+              })}
+              className="bg-zinc-700 px-4 py-2 rounded-lg hover:bg-zinc-600 transition-colors text-cyan-400 font-bold font-mono outline-none cursor-pointer"
             >
-              <span className="text-cyan-400 font-bold font-mono">{swapForm.fromToken}</span>
-            </button>
+              <option value="TKA">TKA</option>
+              <option value="TKB">TKB</option>
+            </select>
           </div>
-          {isConnected && swapForm.fromToken === 'ETH' && ethBalance && (
+          {isConnected && (
             <button
-              onClick={() => setSwapForm({ fromAmount: formatEther(ethBalance.value) })}
+              onClick={() => {
+                const balance = swapForm.fromToken === 'TKA' ? tkaBalance : tkbBalance;
+                if (balance) {
+                  setSwapForm({ fromAmount: (Number(balance) / 1e18).toString() });
+                }
+              }}
               className="mt-2 text-xs text-cyan-500 hover:text-cyan-400 font-mono"
             >
               MAX
@@ -201,6 +295,15 @@ export function SwapInterface() {
         <div className="bg-zinc-800/50 rounded-lg p-4 border border-zinc-700">
           <div className="flex justify-between mb-2">
             <span className="text-sm text-zinc-400 font-mono">To</span>
+            {isConnected && (
+              <span className="text-sm text-zinc-500 font-mono">
+                Balance: {swapForm.toToken === 'TKA' && tkaBalance 
+                  ? (Number(tkaBalance) / 1e18).toFixed(4)
+                  : swapForm.toToken === 'TKB' && tkbBalance
+                  ? (Number(tkbBalance) / 1e18).toFixed(4)
+                  : '0.0000'}
+              </span>
+            )}
           </div>
           <div className="flex items-center gap-4">
             <input
@@ -211,60 +314,122 @@ export function SwapInterface() {
               className="flex-1 bg-transparent text-2xl text-white font-mono outline-none"
             />
             <button
-              className="flex items-center gap-2 bg-zinc-700 px-4 py-2 rounded-lg hover:bg-zinc-600 transition-colors"
+              className="flex items-center gap-2 bg-zinc-700 px-4 py-2 rounded-lg cursor-default"
             >
               <span className="text-cyan-400 font-bold font-mono">{swapForm.toToken}</span>
             </button>
           </div>
         </div>
         
-        {/* Rate Info */}
-        {swapForm.fromAmount && parseFloat(swapForm.fromAmount) > 0 && (
+        {/* Pool Info */}
+        {reserves && reserves[0] > BigInt(0) && reserves[1] > BigInt(0) && (
           <div className="mt-4 p-3 bg-zinc-800/30 rounded-lg border border-zinc-700/50">
+            <div className="flex justify-between text-sm font-mono mb-1">
+              <span className="text-zinc-400">Pool Reserves</span>
+            </div>
             <div className="flex justify-between text-sm font-mono">
-              <span className="text-zinc-400">Rate</span>
-              <span className="text-zinc-300">
-                1 ETH = {MOCK_ETH_PRICE_USD.toLocaleString()} USDC
-              </span>
+              <span className="text-zinc-400">TKA</span>
+              <span className="text-zinc-300">{(Number(reserves[0]) / 1e18).toFixed(2)}</span>
             </div>
-            <div className="flex justify-between text-sm font-mono mt-1">
-              <span className="text-zinc-400">Slippage</span>
-              <span className="text-zinc-300">{swapForm.slippage}%</span>
+            <div className="flex justify-between text-sm font-mono">
+              <span className="text-zinc-400">TKB</span>
+              <span className="text-zinc-300">{(Number(reserves[1]) / 1e18).toFixed(2)}</span>
             </div>
+            {swapForm.fromAmount && parseFloat(swapForm.fromAmount) > 0 && (
+              <>
+                <div className="border-t border-zinc-700 my-2"></div>
+                <div className="flex justify-between text-sm font-mono">
+                  <span className="text-zinc-400">Rate</span>
+                  <span className="text-zinc-300">
+                    1 {swapForm.fromToken} ≈ {swapForm.toAmount && swapForm.fromAmount 
+                      ? (parseFloat(swapForm.toAmount) / parseFloat(swapForm.fromAmount)).toFixed(4)
+                      : '0.0000'} {swapForm.toToken}
+                  </span>
+                </div>
+                <div className="flex justify-between text-sm font-mono">
+                  <span className="text-zinc-400">Slippage</span>
+                  <span className="text-zinc-300">{swapForm.slippage}%</span>
+                </div>
+              </>
+            )}
           </div>
         )}
         
-        {/* Swap Button */}
-        <button
-          onClick={handleSwap}
-          disabled={isSwapping || !isConnected || !swapForm.fromAmount}
-          className={`w-full mt-6 py-4 rounded-lg font-bold font-mono text-lg transition-all ${
-            isConnected && swapForm.fromAmount
-              ? 'bg-gradient-to-r from-cyan-500 to-green-500 hover:from-cyan-400 hover:to-green-400 text-black'
-              : 'bg-zinc-700 text-zinc-400 cursor-not-allowed'
-          }`}
-        >
-          {isSwapping ? (
-            <span className="flex items-center justify-center gap-2">
-              <Loader2 className="w-5 h-5 animate-spin" />
-              Swapping...
-            </span>
-          ) : !isConnected ? (
-            <span className="flex items-center justify-center gap-2">
-              <Wallet className="w-5 h-5" />
-              Connect Wallet
-            </span>
-          ) : !swapForm.fromAmount ? (
-            'Enter Amount'
-          ) : (
-            'Swap'
-          )}
-        </button>
+        {!reserves || reserves[0] === BigInt(0) || reserves[1] === BigInt(0) ? (
+          <div className="mt-4 p-3 bg-amber-900/20 rounded-lg border border-amber-500/30">
+            <p className="text-sm text-amber-400 font-mono">
+              ⚠️ No liquidity in pool. Add liquidity first to enable swaps.
+            </p>
+          </div>
+        ) : null}
         
-        {/* Mock Notice */}
-        <p className="mt-4 text-xs text-center text-zinc-500 font-mono">
-          ⚠️ Mock interface - No real liquidity pools on Sepolia
-        </p>
+        {/* Action Buttons */}
+        <div className="flex gap-2 mt-6">
+          <button
+            onClick={handleApprove}
+            disabled={isPending || isConfirming || !isConnected || !swapForm.fromAmount}
+            className={`flex-1 py-3 rounded-lg font-bold font-mono transition-all ${
+              isConnected && swapForm.fromAmount
+                ? 'bg-cyan-600 hover:bg-cyan-500 text-white'
+                : 'bg-zinc-700 text-zinc-400 cursor-not-allowed'
+            }`}
+          >
+            {isPending || isConfirming ? (
+              <span className="flex items-center justify-center gap-2">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Approving...
+              </span>
+            ) : (
+              'Approve'
+            )}
+          </button>
+          <button
+            onClick={handleSwap}
+            disabled={isSwapping || isPending || isConfirming || !isConnected || !swapForm.fromAmount}
+            className={`flex-1 py-3 rounded-lg font-bold font-mono transition-all ${
+              isConnected && swapForm.fromAmount && reserves && reserves[0] > BigInt(0)
+                ? 'bg-gradient-to-r from-cyan-500 to-green-500 hover:from-cyan-400 hover:to-green-400 text-black'
+                : 'bg-zinc-700 text-zinc-400 cursor-not-allowed'
+            }`}
+          >
+            {isSwapping || isPending || isConfirming ? (
+              <span className="flex items-center justify-center gap-2">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                {isConfirming ? 'Confirming...' : 'Swapping...'}
+              </span>
+            ) : !isConnected ? (
+              <span className="flex items-center justify-center gap-2">
+                <Wallet className="w-4 h-4" />
+                Wallet
+              </span>
+            ) : !swapForm.fromAmount ? (
+              'Enter Amount'
+            ) : (
+              'Swap'
+            )}
+          </button>
+        </div>
+        
+        {/* Contract Info */}
+        <div className="mt-4 p-3 bg-green-900/10 rounded-lg border border-green-500/20">
+          <p className="text-xs text-green-400 font-mono mb-2">
+            ✅ Connected to deployed contracts on Sepolia
+          </p>
+          <div className="space-y-1 text-xs font-mono">
+            <div className="flex justify-between">
+              <span className="text-zinc-500">SimpleSwap:</span>
+              <span className="text-cyan-400">{DEPLOYED_CONTRACTS.SIMPLE_SWAP.slice(0, 10)}...</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-zinc-500">TokenA (TKA):</span>
+              <span className="text-cyan-400">{DEPLOYED_CONTRACTS.TOKEN_A.slice(0, 10)}...</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-zinc-500">TokenB (TKB):</span>
+              <span className="text-cyan-400">{DEPLOYED_CONTRACTS.TOKEN_B.slice(0, 10)}...</span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

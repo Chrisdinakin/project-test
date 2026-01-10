@@ -2,6 +2,11 @@
 
 # dependencies
 /node_modules
+node_modules/
+web3-backend/node_modules/
+web3-backend/artifacts/
+web3-backend/cache/
+/web3-backend/node_modules
 /.pnp
 .pnp.*
 .yarn/*

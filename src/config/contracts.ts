@@ -243,3 +243,13 @@ export const SIMPLE_SWAP_ABI = [
     "type": "function"
   }
 ] as const;
+
+// Deployed Contract Addresses on Sepolia
+export const DEPLOYED_CONTRACTS = {
+  // SimpleSwap DEX contract
+  SIMPLE_SWAP: '0x4b019C9C7636277C7D9944880180DC592944fc33' as `0x${string}`,
+  // Token A (TKA)
+  TOKEN_A: '0xF64f05F486155fAc6Cb36750Ef530f839f3ab9A0' as `0x${string}`,
+  // Token B (TKB)
+  TOKEN_B: '0xBD0d58F20A8c3F99Eaf282ec81e687dA14813754' as `0x${string}`,
+} as const;

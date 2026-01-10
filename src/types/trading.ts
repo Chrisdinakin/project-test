@@ -2,8 +2,8 @@
 import type { UTCTimestamp } from 'lightweight-charts';
 
 export interface SwapFormState {
-  fromToken: 'ETH' | 'USDC';
-  toToken: 'ETH' | 'USDC';
+  fromToken: 'TKA' | 'TKB';
+  toToken: 'TKA' | 'TKB';
   fromAmount: string;
   toAmount: string;
   slippage: number;

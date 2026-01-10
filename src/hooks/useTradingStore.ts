@@ -24,8 +24,8 @@ interface TradingStore {
 }
 
 const defaultSwapForm: SwapFormState = {
-  fromToken: 'ETH',
-  toToken: 'USDC',
+  fromToken: 'TKA',
+  toToken: 'TKB',
   fromAmount: '',
   toAmount: '',
   slippage: 0.5,
