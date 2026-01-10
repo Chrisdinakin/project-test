@@ -6,6 +6,7 @@ import { useAccount, useSignMessage } from 'wagmi';
 import toast from 'react-hot-toast';
 import { useTradingStore } from '@/hooks/useTradingStore';
 import type { PriceData } from '@/types/trading';
+import { TOP_COINS } from '@/config/markets';
 
 // Configuration constants for mock data generation
 const MOCK_DATA_CONFIG = {
@@ -41,7 +42,8 @@ export function FuturesSimulator() {
       const timeoutId = setTimeout(() => controller.abort(), COINGECKO_API_TIMEOUT_MS);
       
       try {
-        const coinId = futuresForm.asset === 'ETH' ? 'ethereum' : 'bitcoin';
+        const coin = TOP_COINS.find(c => c.symbol === futuresForm.asset) || TOP_COINS.find(c => c.symbol === 'ETH')!;
+        const coinId = coin.id;
         const response = await fetch(
           `https://api.coingecko.com/api/v3/coins/${coinId}/ohlc?vs_currency=usd&days=7`,
           { signal: controller.signal }
@@ -249,18 +251,18 @@ Entry Price: $${currentPrice?.toLocaleString() || 'N/A'}`,
         </div>
         
         {/* Asset Selector */}
-        <div className="flex gap-2 mb-6">
-          {(['ETH', 'BTC'] as const).map((asset) => (
+        <div className="flex gap-2 mb-6 overflow-x-auto">
+          {TOP_COINS.map((c) => (
             <button
-              key={asset}
-              onClick={() => setFuturesForm({ asset })}
+              key={c.symbol}
+              onClick={() => setFuturesForm({ asset: c.symbol as any })}
               className={`px-6 py-2 rounded-lg font-mono font-bold transition-all ${
-                futuresForm.asset === asset
+                futuresForm.asset === c.symbol
                   ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500'
                   : 'bg-zinc-800 text-zinc-400 border border-zinc-700 hover:border-zinc-500'
               }`}
             >
-              {asset}
+              {c.symbol}
             </button>
           ))}
         </div>
@@ -398,11 +400,11 @@ Entry Price: $${currentPrice?.toLocaleString() || 'N/A'}`,
 }
 
 // Generate mock price data as fallback when API is unavailable
-function generateMockPriceData(asset: 'ETH' | 'BTC'): PriceData[] {
+function generateMockPriceData(asset: string): PriceData[] {
   type UTCTimestamp = import('lightweight-charts').UTCTimestamp;
   const { ETH_BASE_PRICE, BTC_BASE_PRICE, VOLATILITY_FACTOR, MIN_PRICE_RATIO, CHART_HOURS } = MOCK_DATA_CONFIG;
   
-  const basePrice = asset === 'ETH' ? ETH_BASE_PRICE : BTC_BASE_PRICE;
+  const basePrice = asset === 'BTC' ? BTC_BASE_PRICE : ETH_BASE_PRICE;
   const data: PriceData[] = [];
   const now = Math.floor(Date.now() / 1000);
   const hourInSeconds = 3600;
