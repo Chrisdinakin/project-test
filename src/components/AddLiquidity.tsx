@@ -19,6 +19,7 @@ export function AddLiquidity() {
     address: DEPLOYED_CONTRACTS.SIMPLE_SWAP,
     abi: SIMPLE_SWAP_ABI,
     functionName: 'getReserves',
+    watch: true,
   });
 
   // Balances
@@ -27,6 +28,8 @@ export function AddLiquidity() {
     abi: MOCK_TOKEN_ABI,
     functionName: 'balanceOf',
     args: address ? [address] : undefined,
+    watch: true,
+    query: { enabled: !!address },
   });
 
   const { data: balanceBData } = useReadContract({
@@ -34,6 +37,8 @@ export function AddLiquidity() {
     abi: MOCK_TOKEN_ABI,
     functionName: 'balanceOf',
     args: address ? [address] : undefined,
+    watch: true,
+    query: { enabled: !!address },
   });
 
   // Allowances
@@ -42,6 +47,8 @@ export function AddLiquidity() {
     abi: MOCK_TOKEN_ABI,
     functionName: 'allowance',
     args: address ? [address, DEPLOYED_CONTRACTS.SIMPLE_SWAP] : undefined,
+    watch: true,
+    query: { enabled: !!address },
   });
 
   const { data: allowanceBData } = useReadContract({
@@ -49,6 +56,8 @@ export function AddLiquidity() {
     abi: MOCK_TOKEN_ABI,
     functionName: 'allowance',
     args: address ? [address, DEPLOYED_CONTRACTS.SIMPLE_SWAP] : undefined,
+    watch: true,
+    query: { enabled: !!address },
   });
 
   // Write + receipt
