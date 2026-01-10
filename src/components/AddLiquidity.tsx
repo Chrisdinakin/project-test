@@ -170,27 +170,27 @@ export function AddLiquidity() {
 
   return (
     <div className="w-full max-w-3xl mx-auto">
-      <div className="bg-zinc-900/80 border border-cyan-500/20 rounded-xl p-6 backdrop-blur-sm">
+      <div className="bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-xl p-6">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-cyan-500/15 border border-cyan-500/30 rounded-xl">
-              <Droplets className="w-6 h-6 text-cyan-400" />
+            <div className="w-10 h-10 rounded-xl bg-[var(--accent-muted)] flex items-center justify-center">
+              <Droplets className="w-5 h-5 text-[var(--accent)]" />
             </div>
             <div>
-              <p className="text-xs text-cyan-400/80 font-mono">POOLED LIQUIDITY</p>
-              <h2 className="text-xl font-bold text-white font-mono">Add TKA / TKB</h2>
+              <p className="text-xs text-[var(--text-muted)] font-medium uppercase tracking-wide">Pooled Liquidity</p>
+              <h2 className="text-lg font-semibold text-[var(--text-primary)]">Add TKA / TKB</h2>
             </div>
           </div>
-          <div className="text-xs text-zinc-400 font-mono bg-zinc-800/60 px-3 py-1 rounded-lg border border-zinc-700/60">
-            SimpleSwap Contract
+          <div className="text-xs text-[var(--text-muted)] bg-[var(--bg-tertiary)] px-3 py-1.5 rounded-lg border border-[var(--border-subtle)]">
+            SimpleSwap
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          <div className="p-4 rounded-lg border border-zinc-700 bg-zinc-800/50">
-            <div className="flex items-center justify-between mb-2 text-sm text-zinc-400 font-mono">
-              <span>Token A (TKA)</span>
-              {isConnected && <span>Balance: {renderBalance(balanceA)} TKA</span>}
+          <div className="p-4 rounded-xl border border-[var(--border-default)] bg-[var(--bg-tertiary)]">
+            <div className="flex items-center justify-between mb-2 text-xs text-[var(--text-muted)]">
+              <span className="font-medium uppercase tracking-wide">Token A (TKA)</span>
+              {isConnected && <span>Balance: <span className="font-mono text-[var(--text-secondary)]">{renderBalance(balanceA)}</span></span>}
             </div>
             <div className="flex items-center gap-3">
               <input
@@ -199,11 +199,11 @@ export function AddLiquidity() {
                 placeholder="0.0"
                 value={amountA}
                 onChange={(e) => setAmountA(e.target.value)}
-                className="flex-1 bg-transparent text-2xl text-white font-mono outline-none"
+                className="flex-1 bg-transparent text-2xl text-[var(--text-primary)] font-mono outline-none placeholder:text-[var(--text-placeholder)]"
               />
               <button
                 onClick={() => setAmountA(balanceA ? (Number(balanceA) / 1e18).toString() : '')}
-                className="text-xs text-cyan-400 hover:text-cyan-300 font-mono"
+                className="text-xs text-[var(--accent)] hover:text-[var(--accent-hover)] font-medium"
               >
                 MAX
               </button>
@@ -211,8 +211,8 @@ export function AddLiquidity() {
             <button
               onClick={() => handleApprove('A')}
               disabled={!needsApproveA || isPending || isConfirming}
-              className={`mt-3 w-full py-2 rounded-lg font-mono text-sm transition-all ${
-                needsApproveA ? 'bg-cyan-600 hover:bg-cyan-500 text-white' : 'bg-zinc-700 text-zinc-400 cursor-not-allowed'
+              className={`mt-3 w-full py-2.5 rounded-lg font-medium text-sm transition-all ${
+                needsApproveA ? 'bg-[var(--bg-elevated)] border border-[var(--border-default)] text-[var(--text-primary)] hover:border-[var(--accent)] hover:text-[var(--accent)]' : 'bg-[var(--success-muted)] text-[var(--success)] cursor-default'
               }`}
             >
               {(isPending && lastAction === 'approveA') || (isConfirming && lastAction === 'approveA') ? (
@@ -220,14 +220,14 @@ export function AddLiquidity() {
                   <Loader2 className="w-4 h-4 animate-spin" />
                   Approving...
                 </span>
-              ) : needsApproveA ? 'Approve TKA' : 'TKA Approved'}
+              ) : needsApproveA ? 'Approve TKA' : '✓ TKA Approved'}
             </button>
           </div>
 
-          <div className="p-4 rounded-lg border border-zinc-700 bg-zinc-800/50">
-            <div className="flex items-center justify-between mb-2 text-sm text-zinc-400 font-mono">
-              <span>Token B (TKB)</span>
-              {isConnected && <span>Balance: {renderBalance(balanceB)} TKB</span>}
+          <div className="p-4 rounded-xl border border-[var(--border-default)] bg-[var(--bg-tertiary)]">
+            <div className="flex items-center justify-between mb-2 text-xs text-[var(--text-muted)]">
+              <span className="font-medium uppercase tracking-wide">Token B (TKB)</span>
+              {isConnected && <span>Balance: <span className="font-mono text-[var(--text-secondary)]">{renderBalance(balanceB)}</span></span>}
             </div>
             <div className="flex items-center gap-3">
               <input
@@ -236,11 +236,11 @@ export function AddLiquidity() {
                 placeholder="0.0"
                 value={amountB}
                 onChange={(e) => setAmountB(e.target.value)}
-                className="flex-1 bg-transparent text-2xl text-white font-mono outline-none"
+                className="flex-1 bg-transparent text-2xl text-[var(--text-primary)] font-mono outline-none placeholder:text-[var(--text-placeholder)]"
               />
               <button
                 onClick={() => setAmountB(balanceB ? (Number(balanceB) / 1e18).toString() : '')}
-                className="text-xs text-cyan-400 hover:text-cyan-300 font-mono"
+                className="text-xs text-[var(--accent)] hover:text-[var(--accent-hover)] font-medium"
               >
                 MAX
               </button>
@@ -248,8 +248,8 @@ export function AddLiquidity() {
             <button
               onClick={() => handleApprove('B')}
               disabled={!needsApproveB || isPending || isConfirming}
-              className={`mt-3 w-full py-2 rounded-lg font-mono text-sm transition-all ${
-                needsApproveB ? 'bg-cyan-600 hover:bg-cyan-500 text-white' : 'bg-zinc-700 text-zinc-400 cursor-not-allowed'
+              className={`mt-3 w-full py-2.5 rounded-lg font-medium text-sm transition-all ${
+                needsApproveB ? 'bg-[var(--bg-elevated)] border border-[var(--border-default)] text-[var(--text-primary)] hover:border-[var(--accent)] hover:text-[var(--accent)]' : 'bg-[var(--success-muted)] text-[var(--success)] cursor-default'
               }`}
             >
               {(isPending && lastAction === 'approveB') || (isConfirming && lastAction === 'approveB') ? (
@@ -257,14 +257,14 @@ export function AddLiquidity() {
                   <Loader2 className="w-4 h-4 animate-spin" />
                   Approving...
                 </span>
-              ) : needsApproveB ? 'Approve TKB' : 'TKB Approved'}
+              ) : needsApproveB ? 'Approve TKB' : '✓ TKB Approved'}
             </button>
           </div>
         </div>
 
-        <div className="p-4 rounded-lg border border-cyan-500/20 bg-cyan-500/5 mb-4">
-          <p className="text-sm text-cyan-300 font-mono mb-1">How it works</p>
-          <ul className="text-xs text-cyan-100/80 font-mono space-y-1 list-disc list-inside">
+        <div className="p-4 rounded-xl border border-[var(--accent)]/20 bg-[var(--accent-muted)] mb-4">
+          <p className="text-sm text-[var(--accent)] font-medium mb-2">How it works</p>
+          <ul className="text-xs text-[var(--text-secondary)] space-y-1 list-disc list-inside">
             <li>Approve TKA and TKB once for the SimpleSwap contract.</li>
             <li>Enter equal-value amounts (1:1 by price) and click Add Liquidity.</li>
             <li>After confirmation, swaps become available in the Swap tab.</li>
@@ -274,10 +274,10 @@ export function AddLiquidity() {
         <button
           onClick={handleAddLiquidity}
           disabled={isPending || isConfirming || !isConnected || !amountAWei || !amountBWei}
-          className={`w-full py-3 rounded-lg font-bold font-mono transition-all ${
+          className={`w-full py-3.5 rounded-xl font-semibold transition-all ${
             isConnected && amountAWei && amountBWei && !needsApproveA && !needsApproveB
-              ? 'bg-gradient-to-r from-cyan-500 to-green-500 hover:from-cyan-400 hover:to-green-400 text-black'
-              : 'bg-zinc-700 text-zinc-400 cursor-not-allowed'
+              ? 'bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white'
+              : 'bg-[var(--bg-tertiary)] text-[var(--text-muted)] cursor-not-allowed'
           }`}
         >
           {(isPending && lastAction === 'addLiquidity') || (isConfirming && lastAction === 'addLiquidity') ? (
@@ -298,19 +298,19 @@ export function AddLiquidity() {
         </button>
 
         {poolReserves && (
-          <div className="mt-4 p-4 rounded-lg border border-zinc-700 bg-zinc-800/40">
-            <div className="flex items-center gap-2 text-sm text-zinc-300 font-mono mb-2">
-              <ShieldCheck className="w-4 h-4 text-cyan-400" />
-              Pool Reserves (current)
+          <div className="mt-4 p-4 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-tertiary)]">
+            <div className="flex items-center gap-2 text-sm text-[var(--text-secondary)] font-medium mb-3">
+              <ShieldCheck className="w-4 h-4 text-[var(--accent)]" />
+              Pool Reserves
             </div>
-            <div className="grid grid-cols-2 gap-3 text-sm font-mono">
-              <div className="flex items-center justify-between text-zinc-400">
+            <div className="grid grid-cols-2 gap-3 text-sm">
+              <div className="flex items-center justify-between text-[var(--text-muted)]">
                 <span>TKA</span>
-                <span className="text-zinc-100">{(Number(poolReserves[0]) / 1e18).toFixed(3)}</span>
+                <span className="text-[var(--text-primary)] font-mono">{(Number(poolReserves[0]) / 1e18).toFixed(3)}</span>
               </div>
-              <div className="flex items-center justify-between text-zinc-400">
+              <div className="flex items-center justify-between text-[var(--text-muted)]">
                 <span>TKB</span>
-                <span className="text-zinc-100">{(Number(poolReserves[1]) / 1e18).toFixed(3)}</span>
+                <span className="text-[var(--text-primary)] font-mono">{(Number(poolReserves[1]) / 1e18).toFixed(3)}</span>
               </div>
             </div>
           </div>

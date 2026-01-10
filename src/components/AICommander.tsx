@@ -86,18 +86,18 @@ export function AICommander() {
   
   return (
     <div className="w-full max-w-2xl mx-auto">
-      <div className="bg-zinc-900/80 border border-cyan-500/20 rounded-xl backdrop-blur-sm overflow-hidden">
+      <div className="bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-xl overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-zinc-700">
+        <div className="flex items-center justify-between p-4 border-b border-[var(--border-subtle)]">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-cyan-500/20 rounded-lg">
-              <Terminal className="w-5 h-5 text-cyan-400" />
+            <div className="w-9 h-9 rounded-lg bg-[var(--accent-muted)] flex items-center justify-center">
+              <Terminal className="w-4 h-4 text-[var(--accent)]" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-cyan-400 font-mono">
-                AI COMMANDER
+              <h2 className="text-base font-semibold text-[var(--text-primary)]">
+                AI Commands
               </h2>
-              <p className="text-xs text-zinc-500 font-mono">
+              <p className="text-xs text-[var(--text-muted)]">
                 Natural language → Trading actions
               </p>
             </div>
@@ -105,10 +105,10 @@ export function AICommander() {
           {chatMessages.length > 0 && (
             <button
               onClick={clearChatMessages}
-              className="p-2 hover:bg-zinc-800 rounded-lg transition-colors group"
+              className="p-2 hover:bg-[var(--bg-tertiary)] rounded-lg transition-colors group"
               title="Clear chat"
             >
-              <Trash2 className="w-4 h-4 text-zinc-500 group-hover:text-red-400" />
+              <Trash2 className="w-4 h-4 text-[var(--text-muted)] group-hover:text-[var(--error)]" />
             </button>
           )}
         </div>
@@ -117,18 +117,18 @@ export function AICommander() {
         <div className="h-[400px] overflow-y-auto p-4 space-y-4">
           {chatMessages.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-center">
-              <Sparkles className="w-12 h-12 text-cyan-500/50 mb-4" />
-              <p className="text-zinc-400 font-mono text-sm mb-4">
+              <Sparkles className="w-10 h-10 text-[var(--accent)]/40 mb-4" />
+              <p className="text-[var(--text-secondary)] text-sm mb-4">
                 Type a command to get started
               </p>
               <div className="space-y-2">
-                <p className="text-xs text-zinc-500 font-mono">Example commands:</p>
+                <p className="text-xs text-[var(--text-muted)]">Example commands:</p>
                 <div className="flex flex-wrap gap-2 justify-center">
                   {exampleCommands.slice(0, 3).map((cmd, i) => (
                     <button
                       key={i}
                       onClick={() => setInput(cmd)}
-                      className="px-3 py-1 bg-zinc-800 border border-zinc-700 rounded-lg text-xs text-cyan-400 font-mono hover:border-cyan-500/50 transition-colors"
+                      className="px-3 py-1.5 bg-[var(--bg-tertiary)] border border-[var(--border-default)] rounded-lg text-xs text-[var(--text-secondary)] hover:text-[var(--accent)] hover:border-[var(--accent)]/50 transition-colors"
                     >
                       {cmd}
                     </button>
@@ -148,27 +148,27 @@ export function AICommander() {
                   <div
                     className={`flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center ${
                       message.role === 'user'
-                        ? 'bg-cyan-500/20'
-                        : 'bg-green-500/20'
+                        ? 'bg-[var(--accent-muted)]'
+                        : 'bg-[var(--success-muted)]'
                     }`}
                   >
                     {message.role === 'user' ? (
-                      <User className="w-4 h-4 text-cyan-400" />
+                      <User className="w-4 h-4 text-[var(--accent)]" />
                     ) : (
-                      <Bot className="w-4 h-4 text-green-400" />
+                      <Bot className="w-4 h-4 text-[var(--success)]" />
                     )}
                   </div>
                   <div
-                    className={`max-w-[80%] p-3 rounded-lg font-mono text-sm ${
+                    className={`max-w-[80%] p-3 rounded-xl text-sm ${
                       message.role === 'user'
-                        ? 'bg-cyan-500/10 border border-cyan-500/30 text-cyan-100'
-                        : 'bg-zinc-800 border border-zinc-700 text-zinc-300'
+                        ? 'bg-[var(--accent-muted)] border border-[var(--accent)]/20 text-[var(--text-primary)]'
+                        : 'bg-[var(--bg-tertiary)] border border-[var(--border-default)] text-[var(--text-secondary)]'
                     }`}
                   >
                     <p className="whitespace-pre-wrap">{message.content}</p>
                     {message.commandResult && message.commandResult.parsedSuccessfully && (
-                      <div className="mt-2 pt-2 border-t border-zinc-700">
-                        <span className="text-xs text-green-400">
+                      <div className="mt-2 pt-2 border-t border-[var(--border-subtle)]">
+                        <span className="text-xs text-[var(--success)]">
                           ✓ Form populated - Navigating to {message.commandResult.action} page...
                         </span>
                       </div>
@@ -182,14 +182,14 @@ export function AICommander() {
           
           {isProcessing && (
             <div className="flex gap-3">
-              <div className="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center bg-green-500/20">
-                <Bot className="w-4 h-4 text-green-400 animate-pulse" />
+              <div className="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center bg-[var(--success-muted)]">
+                <Bot className="w-4 h-4 text-[var(--success)] animate-pulse" />
               </div>
-              <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-3">
+              <div className="bg-[var(--bg-tertiary)] border border-[var(--border-default)] rounded-xl p-3">
                 <div className="flex gap-1">
-                  <span className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                  <span className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                  <span className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                  <span className="w-2 h-2 bg-[var(--accent)] rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                  <span className="w-2 h-2 bg-[var(--accent)] rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                  <span className="w-2 h-2 bg-[var(--accent)] rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                 </div>
               </div>
             </div>
@@ -197,23 +197,23 @@ export function AICommander() {
         </div>
         
         {/* Input */}
-        <form onSubmit={handleSubmit} className="p-4 border-t border-zinc-700">
+        <form onSubmit={handleSubmit} className="p-4 border-t border-[var(--border-subtle)]">
           <div className="flex gap-2">
             <input
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Type a command... (e.g., 'Swap 0.5 ETH for USDC')"
-              className="flex-1 bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 text-white font-mono text-sm outline-none focus:border-cyan-500 transition-colors placeholder:text-zinc-500"
+              className="flex-1 bg-[var(--bg-tertiary)] border border-[var(--border-default)] rounded-xl px-4 py-3 text-[var(--text-primary)] text-sm outline-none focus:border-[var(--accent)] transition-colors placeholder:text-[var(--text-placeholder)]"
               disabled={isProcessing}
             />
             <button
               type="submit"
               disabled={!input.trim() || isProcessing}
-              className={`px-4 rounded-lg transition-all ${
+              className={`px-4 rounded-xl transition-all ${
                 input.trim() && !isProcessing
-                  ? 'bg-cyan-500 hover:bg-cyan-400 text-black'
-                  : 'bg-zinc-700 text-zinc-400 cursor-not-allowed'
+                  ? 'bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white'
+                  : 'bg-[var(--bg-tertiary)] text-[var(--text-muted)] cursor-not-allowed'
               }`}
             >
               <Send className="w-5 h-5" />
@@ -227,7 +227,7 @@ export function AICommander() {
                 key={i}
                 type="button"
                 onClick={() => setInput(cmd)}
-                className="px-2 py-1 bg-zinc-800/50 border border-zinc-700/50 rounded text-xs text-zinc-500 font-mono hover:text-cyan-400 hover:border-cyan-500/30 transition-colors"
+                className="px-2.5 py-1 bg-[var(--bg-tertiary)]/50 border border-[var(--border-subtle)] rounded-lg text-xs text-[var(--text-muted)] hover:text-[var(--accent)] hover:border-[var(--accent)]/30 transition-colors"
               >
                 {cmd}
               </button>

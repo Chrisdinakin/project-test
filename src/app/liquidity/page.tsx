@@ -23,11 +23,11 @@ export default function LiquidityPage() {
         </div>
 
         {isWrongNetwork && (
-          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl flex items-center gap-3">
-            <AlertTriangle className="w-6 h-6 text-red-500" />
+          <div className="mb-6 p-4 bg-[var(--error-muted)] border border-[var(--error)]/20 rounded-xl flex items-center gap-3">
+            <AlertTriangle className="w-5 h-5 text-[var(--error)]" />
             <div>
-              <p className="text-red-400 font-mono font-bold">Wrong Network</p>
-              <p className="text-red-400/70 font-mono text-sm">Please switch to Ethereum Sepolia (Chain ID: 11155111)</p>
+              <p className="text-[var(--error)] font-medium">Wrong Network</p>
+              <p className="text-[var(--text-secondary)] text-sm">Please switch to Ethereum Sepolia</p>
             </div>
           </div>
         )}

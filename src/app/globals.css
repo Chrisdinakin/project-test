@@ -1,101 +1,121 @@
 @import "tailwindcss";
 
 :root {
-  --background: #050505;
-  --foreground: #ededed;
-  --cyber-cyan: #22d3ee;
-  --cyber-green: #22c55e;
-  --cyber-red: #ef4444;
+  /* Background colors */
+  --bg-primary: #0A0A0F;
+  --bg-secondary: #12121A;
+  --bg-tertiary: #1A1A24;
+  --bg-elevated: #1F1F2A;
+  
+  /* Border colors */
+  --border-default: #2A2A38;
+  --border-subtle: #1F1F2A;
+  --border-focus: #3B82F6;
+  
+  /* Text colors */
+  --text-primary: #F5F5F7;
+  --text-secondary: #A1A1AA;
+  --text-muted: #71717A;
+  --text-placeholder: #52525B;
+  
+  /* Accent colors */
+  --accent: #3B82F6;
+  --accent-hover: #2563EB;
+  --accent-muted: rgba(59, 130, 246, 0.15);
+  
+  /* Status colors */
+  --success: #10B981;
+  --success-muted: rgba(16, 185, 129, 0.15);
+  --warning: #F59E0B;
+  --warning-muted: rgba(245, 158, 11, 0.15);
+  --error: #EF4444;
+  --error-muted: rgba(239, 68, 68, 0.15);
+  
+  /* Chart colors */
+  --chart-green: #22C55E;
+  --chart-red: #EF4444;
+  
+  /* Legacy mapping */
+  --background: var(--bg-primary);
+  --foreground: var(--text-primary);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-background: var(--bg-primary);
+  --color-foreground: var(--text-primary);
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', 'Monaco', monospace;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Cyber Terminal Aesthetics */
-body::before {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: 
-    radial-gradient(ellipse at top, rgba(34, 211, 238, 0.05) 0%, transparent 50%),
-    radial-gradient(ellipse at bottom, rgba(34, 197, 94, 0.03) 0%, transparent 50%);
-  pointer-events: none;
-  z-index: -1;
-}
-
-/* Scrollbar Styling */
+/* Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #18181b;
+  background: var(--bg-secondary);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #3f3f46;
-  border-radius: 4px;
+  background: var(--border-default);
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #52525b;
-}
-
-/* Custom animations */
-@keyframes glow {
-  0%, 100% {
-    box-shadow: 0 0 5px rgba(34, 211, 238, 0.5);
-  }
-  50% {
-    box-shadow: 0 0 20px rgba(34, 211, 238, 0.8), 0 0 30px rgba(34, 211, 238, 0.4);
-  }
-}
-
-.animate-glow {
-  animation: glow 2s ease-in-out infinite;
+  background: #3f3f46;
 }
 
 /* Toast animations */
 @keyframes enter {
   0% {
-    transform: translateX(100%);
+    transform: translateY(8px);
     opacity: 0;
   }
   100% {
-    transform: translateX(0);
+    transform: translateY(0);
     opacity: 1;
   }
 }
 
 @keyframes leave {
   0% {
-    transform: translateX(0);
+    transform: translateY(0);
     opacity: 1;
   }
   100% {
-    transform: translateX(100%);
+    transform: translateY(8px);
     opacity: 0;
   }
 }
 
 .animate-enter {
-  animation: enter 0.35s ease-out;
+  animation: enter 0.2s ease-out;
 }
 
 .animate-leave {
-  animation: leave 0.35s ease-in forwards;
+  animation: leave 0.2s ease-in forwards;
+}
+
+/* Loading skeleton */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, var(--bg-tertiary) 25%, var(--bg-elevated) 50%, var(--bg-tertiary) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 6px;
 }
 
 /* Input number spinner removal */

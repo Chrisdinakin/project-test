@@ -312,27 +312,27 @@ Entry Price: $${currentPrice?.toLocaleString() || 'N/A'}`,
         <div
           className={`${
             t.visible ? 'animate-enter' : 'animate-leave'
-          } max-w-md w-full bg-zinc-900 border ${
-            position === 'long' ? 'border-green-500/30 shadow-green-500/20' : 'border-red-500/30 shadow-red-500/20'
-          } shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5`}
+          } max-w-md w-full bg-[var(--bg-secondary)] border ${
+            position === 'long' ? 'border-[var(--success)]/30' : 'border-[var(--error)]/30'
+          } shadow-lg rounded-xl pointer-events-auto`}
         >
           <div className="flex-1 w-0 p-4">
             <div className="flex items-start">
               <div className="flex-shrink-0">
                 {position === 'long' ? (
-                  <TrendingUp className="h-6 w-6 text-green-400" />
+                  <TrendingUp className="h-5 w-5 text-[var(--success)]" />
                 ) : (
-                  <TrendingDown className="h-6 w-6 text-red-400" />
+                  <TrendingDown className="h-5 w-5 text-[var(--error)]" />
                 )}
               </div>
               <div className="ml-3 flex-1">
-                <p className={`text-sm font-medium ${position === 'long' ? 'text-green-400' : 'text-red-400'}`}>
-                  {position.toUpperCase()} Position Simulated!
+                <p className={`text-sm font-medium ${position === 'long' ? 'text-[var(--success)]' : 'text-[var(--error)]'}`}>
+                  {position.toUpperCase()} Position Simulated
                 </p>
-                <p className="mt-1 text-sm text-zinc-400">
+                <p className="mt-1 text-sm text-[var(--text-secondary)] font-mono">
                   {futuresForm.size} {futuresForm.asset} @ {futuresForm.leverage}x
                 </p>
-                <p className="mt-1 text-xs text-zinc-500">
+                <p className="mt-1 text-xs text-[var(--text-muted)]">
                   Entry: ${currentPrice?.toLocaleString() || 'N/A'}
                 </p>
               </div>
@@ -350,25 +350,27 @@ Entry Price: $${currentPrice?.toLocaleString() || 'N/A'}`,
   
   return (
     <div className="w-full max-w-6xl mx-auto">
-      <div className="bg-zinc-900/80 border border-cyan-500/20 rounded-xl p-6 backdrop-blur-sm">
+      <div className="bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-xl p-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <Activity className="w-6 h-6 text-cyan-400" />
-            <h2 className="text-xl font-bold text-cyan-400 font-mono">
-              ADVANCED FUTURES SIMULATOR
+            <div className="w-10 h-10 rounded-xl bg-[var(--accent-muted)] flex items-center justify-center">
+              <Activity className="w-5 h-5 text-[var(--accent)]" />
+            </div>
+            <h2 className="text-lg font-semibold text-[var(--text-primary)]">
+              Futures Simulator
             </h2>
           </div>
           {currentPrice && (
             <div className="flex items-center gap-4">
-              <div>
-                <span className="text-sm text-zinc-400 font-mono block">{futuresForm.asset}/USD</span>
-                <span className="text-2xl font-bold text-cyan-400 font-mono">
+              <div className="text-right">
+                <span className="text-xs text-[var(--text-muted)] block">{futuresForm.asset}/USD</span>
+                <span className="text-xl font-semibold text-[var(--text-primary)] font-mono">
                   ${currentPrice.toLocaleString(undefined, { maximumFractionDigits: 2 })}
                 </span>
               </div>
-              <div className={`text-sm font-mono px-2 py-1 rounded ${
-                priceChange >= 0 ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
+              <div className={`text-sm font-medium px-2.5 py-1 rounded-lg ${
+                priceChange >= 0 ? 'bg-[var(--success-muted)] text-[var(--success)]' : 'bg-[var(--error-muted)] text-[var(--error)]'
               }`}>
                 {priceChange >= 0 ? '+' : ''}{priceChange.toFixed(2)}%
               </div>
@@ -383,10 +385,10 @@ Entry Price: $${currentPrice?.toLocaleString() || 'N/A'}`,
               <button
                 key={c.symbol}
                 onClick={() => setFuturesForm({ asset: c.symbol as any })}
-                className={`px-4 py-2 rounded-lg font-mono font-bold transition-all ${
+                className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
                   futuresForm.asset === c.symbol
-                    ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500'
-                    : 'bg-zinc-800 text-zinc-400 border border-zinc-700 hover:border-zinc-500'
+                    ? 'bg-[var(--accent)] text-white'
+                    : 'bg-[var(--bg-tertiary)] text-[var(--text-secondary)] border border-[var(--border-default)] hover:border-[var(--text-muted)]'
                 }`}
               >
                 {c.symbol}
@@ -399,10 +401,10 @@ Entry Price: $${currentPrice?.toLocaleString() || 'N/A'}`,
               <button
                 key={tf.value}
                 onClick={() => setSelectedTimeframe(tf)}
-                className={`px-3 py-2 rounded font-mono text-sm transition-all ${
+                className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
                   selectedTimeframe.value === tf.value
-                    ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500'
-                    : 'bg-zinc-800 text-zinc-400 border border-zinc-700 hover:border-zinc-500'
+                    ? 'bg-[var(--accent)] text-white'
+                    : 'bg-[var(--bg-tertiary)] text-[var(--text-secondary)] border border-[var(--border-default)] hover:border-[var(--text-muted)]'
                 }`}
               >
                 {tf.label}
@@ -417,10 +419,10 @@ Entry Price: $${currentPrice?.toLocaleString() || 'N/A'}`,
             <button
               key={ct.value}
               onClick={() => setChartType(ct.value as any)}
-              className={`px-3 py-1 rounded text-sm font-mono transition-all ${
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
                 chartType === ct.value
-                  ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500'
-                  : 'bg-zinc-800 text-zinc-400 border border-zinc-700 hover:border-zinc-500'
+                  ? 'bg-[var(--accent)] text-white'
+                  : 'bg-[var(--bg-tertiary)] text-[var(--text-secondary)] border border-[var(--border-default)] hover:border-[var(--text-muted)]'
               }`}
             >
               {ct.label}
@@ -428,31 +430,31 @@ Entry Price: $${currentPrice?.toLocaleString() || 'N/A'}`,
           ))}
           <button
             onClick={() => setShowVolume(!showVolume)}
-            className={`px-3 py-1 rounded text-sm font-mono transition-all flex items-center gap-1 ${
+            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-1.5 ${
               showVolume
-                ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500'
-                : 'bg-zinc-800 text-zinc-400 border border-zinc-700 hover:border-zinc-500'
+                ? 'bg-[var(--accent)] text-white'
+                : 'bg-[var(--bg-tertiary)] text-[var(--text-secondary)] border border-[var(--border-default)] hover:border-[var(--text-muted)]'
             }`}
           >
-            <BarChart2 className="w-3 h-3" />
+            <BarChart2 className="w-3.5 h-3.5" />
             Volume
           </button>
           <button
             onClick={() => setShowMA(!showMA)}
-            className={`px-3 py-1 rounded text-sm font-mono transition-all ${
+            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
               showMA
-                ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500'
-                : 'bg-zinc-800 text-zinc-400 border border-zinc-700 hover:border-zinc-500'
+                ? 'bg-[var(--warning)] text-white'
+                : 'bg-[var(--bg-tertiary)] text-[var(--text-secondary)] border border-[var(--border-default)] hover:border-[var(--text-muted)]'
             }`}
           >
             MA(20)
           </button>
           <button
             onClick={() => setShowMA50(!showMA50)}
-            className={`px-3 py-1 rounded text-sm font-mono transition-all ${
+            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
               showMA50
-                ? 'bg-purple-500/20 text-purple-400 border border-purple-500'
-                : 'bg-zinc-800 text-zinc-400 border border-zinc-700 hover:border-zinc-500'
+                ? 'bg-purple-500 text-white'
+                : 'bg-[var(--bg-tertiary)] text-[var(--text-secondary)] border border-[var(--border-default)] hover:border-[var(--text-muted)]'
             }`}
           >
             MA(50)
@@ -460,10 +462,10 @@ Entry Price: $${currentPrice?.toLocaleString() || 'N/A'}`,
         </div>
         
         {/* Chart */}
-        <div className="mb-6 bg-zinc-800/50 rounded-lg border border-zinc-700 p-4">
+        <div className="mb-6 bg-[var(--bg-tertiary)] rounded-xl border border-[var(--border-default)] p-4">
           {isChartLoading ? (
             <div className="h-[400px] flex items-center justify-center">
-              <Loader2 className="w-8 h-8 text-cyan-400 animate-spin" />
+              <Loader2 className="w-8 h-8 text-[var(--accent)] animate-spin" />
             </div>
           ) : (
             <div ref={chartContainerRef} className="w-full" />
@@ -472,8 +474,8 @@ Entry Price: $${currentPrice?.toLocaleString() || 'N/A'}`,
         
         {/* Trading Controls */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-zinc-800/50 rounded-lg p-4 border border-zinc-700">
-            <label className="text-sm text-zinc-400 font-mono mb-2 block">
+          <div className="bg-[var(--bg-tertiary)] rounded-xl p-4 border border-[var(--border-default)]">
+            <label className="text-xs text-[var(--text-muted)] font-medium uppercase tracking-wide mb-2 block">
               Position Size ({futuresForm.asset})
             </label>
             <input
@@ -481,13 +483,13 @@ Entry Price: $${currentPrice?.toLocaleString() || 'N/A'}`,
               placeholder="0.0"
               value={futuresForm.size}
               onChange={(e) => setFuturesForm({ size: e.target.value })}
-              className="w-full bg-zinc-700 border border-zinc-600 rounded-lg px-4 py-3 text-white font-mono text-lg outline-none focus:border-cyan-500 transition-colors"
+              className="w-full bg-[var(--bg-elevated)] border border-[var(--border-default)] rounded-xl px-4 py-3 text-[var(--text-primary)] font-mono text-lg outline-none focus:border-[var(--accent)] transition-colors placeholder:text-[var(--text-placeholder)]"
             />
           </div>
           
-          <div className="bg-zinc-800/50 rounded-lg p-4 border border-zinc-700">
-            <label className="text-sm text-zinc-400 font-mono mb-2 block">
-              Leverage: {futuresForm.leverage}x
+          <div className="bg-[var(--bg-tertiary)] rounded-xl p-4 border border-[var(--border-default)]">
+            <label className="text-xs text-[var(--text-muted)] font-medium uppercase tracking-wide mb-2 block">
+              Leverage: <span className="text-[var(--text-primary)]">{futuresForm.leverage}x</span>
             </label>
             <input
               type="range"
@@ -495,9 +497,9 @@ Entry Price: $${currentPrice?.toLocaleString() || 'N/A'}`,
               max="100"
               value={futuresForm.leverage}
               onChange={(e) => setFuturesForm({ leverage: parseInt(e.target.value, 10) })}
-              className="w-full h-2 bg-zinc-700 rounded-lg appearance-none cursor-pointer accent-cyan-500"
+              className="w-full h-2 bg-[var(--bg-elevated)] rounded-lg appearance-none cursor-pointer accent-[var(--accent)]"
             />
-            <div className="flex justify-between text-xs text-zinc-500 font-mono mt-1">
+            <div className="flex justify-between text-xs text-[var(--text-muted)] mt-2">
               <span>1x</span>
               <span>25x</span>
               <span>50x</span>
@@ -509,29 +511,29 @@ Entry Price: $${currentPrice?.toLocaleString() || 'N/A'}`,
         
         {/* Position Stats */}
         {futuresForm.size && currentPrice && (
-          <div className="mt-4 p-4 bg-zinc-800/30 rounded-lg border border-zinc-700/50">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm font-mono">
+          <div className="mt-4 p-4 bg-[var(--bg-tertiary)] rounded-xl border border-[var(--border-subtle)]">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
               <div>
-                <span className="text-zinc-400">Notional</span>
-                <p className="text-white">
+                <span className="text-[var(--text-muted)] text-xs">Notional</span>
+                <p className="text-[var(--text-primary)] font-mono">
                   ${(parseFloat(futuresForm.size) * currentPrice).toLocaleString(undefined, { maximumFractionDigits: 2 })}
                 </p>
               </div>
               <div>
-                <span className="text-zinc-400">Leveraged</span>
-                <p className="text-cyan-400">
+                <span className="text-[var(--text-muted)] text-xs">Leveraged</span>
+                <p className="text-[var(--accent)] font-mono">
                   ${(parseFloat(futuresForm.size) * currentPrice * futuresForm.leverage).toLocaleString(undefined, { maximumFractionDigits: 2 })}
                 </p>
               </div>
               <div>
-                <span className="text-zinc-400">Liq. Price (Long)</span>
-                <p className="text-red-400">
+                <span className="text-[var(--text-muted)] text-xs">Liq. Price (Long)</span>
+                <p className="text-[var(--error)] font-mono">
                   ${(currentPrice * (1 - 1 / futuresForm.leverage * 0.9)).toLocaleString(undefined, { maximumFractionDigits: 2 })}
                 </p>
               </div>
               <div>
-                <span className="text-zinc-400">Liq. Price (Short)</span>
-                <p className="text-red-400">
+                <span className="text-[var(--text-muted)] text-xs">Liq. Price (Short)</span>
+                <p className="text-[var(--error)] font-mono">
                   ${(currentPrice * (1 + 1 / futuresForm.leverage * 0.9)).toLocaleString(undefined, { maximumFractionDigits: 2 })}
                 </p>
               </div>
@@ -544,10 +546,10 @@ Entry Price: $${currentPrice?.toLocaleString() || 'N/A'}`,
           <button
             onClick={() => handleOpenPosition('long')}
             disabled={isLoading || !isConnected || !futuresForm.size}
-            className={`py-4 rounded-lg font-bold font-mono text-lg transition-all flex items-center justify-center gap-2 ${
+            className={`py-4 rounded-xl font-semibold text-lg transition-all flex items-center justify-center gap-2 ${
               isConnected && futuresForm.size
-                ? 'bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-400 text-white'
-                : 'bg-zinc-700 text-zinc-400 cursor-not-allowed'
+                ? 'bg-[var(--success)] hover:brightness-110 text-white'
+                : 'bg-[var(--bg-tertiary)] text-[var(--text-muted)] cursor-not-allowed'
             }`}
           >
             {isLoading && futuresForm.position === 'long' ? (
@@ -555,16 +557,16 @@ Entry Price: $${currentPrice?.toLocaleString() || 'N/A'}`,
             ) : (
               <TrendingUp className="w-5 h-5" />
             )}
-            LONG
+            Long
           </button>
           
           <button
             onClick={() => handleOpenPosition('short')}
             disabled={isLoading || !isConnected || !futuresForm.size}
-            className={`py-4 rounded-lg font-bold font-mono text-lg transition-all flex items-center justify-center gap-2 ${
+            className={`py-4 rounded-xl font-semibold text-lg transition-all flex items-center justify-center gap-2 ${
               isConnected && futuresForm.size
-                ? 'bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 text-white'
-                : 'bg-zinc-700 text-zinc-400 cursor-not-allowed'
+                ? 'bg-[var(--error)] hover:brightness-110 text-white'
+                : 'bg-[var(--bg-tertiary)] text-[var(--text-muted)] cursor-not-allowed'
             }`}
           >
             {isLoading && futuresForm.position === 'short' ? (
@@ -572,16 +574,16 @@ Entry Price: $${currentPrice?.toLocaleString() || 'N/A'}`,
             ) : (
               <TrendingDown className="w-5 h-5" />
             )}
-            SHORT
+            Short
           </button>
         </div>
         
         {/* Warning */}
-        <div className="mt-6 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg flex items-start gap-3">
-          <AlertTriangle className="w-5 h-5 text-yellow-500 flex-shrink-0 mt-0.5" />
-          <div className="text-sm text-yellow-500/80 font-mono">
-            <p className="font-bold">Advanced Simulation Mode</p>
-            <p className="mt-1">Enhanced charts with multiple timeframes, technical indicators, and chart types. No real positions are opened.</p>
+        <div className="mt-6 p-4 bg-[var(--warning-muted)] border border-[var(--warning)]/20 rounded-xl flex items-start gap-3">
+          <AlertTriangle className="w-5 h-5 text-[var(--warning)] flex-shrink-0 mt-0.5" />
+          <div className="text-sm text-[var(--warning)]">
+            <p className="font-medium">Simulation Mode</p>
+            <p className="mt-1 text-[var(--text-secondary)]">Enhanced charts with technical indicators. No real positions are opened.</p>
           </div>
         </div>
       </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowLeftRight, BarChart3, Droplets, Terminal, Zap } from 'lucide-react';
+import { ArrowLeftRight, BarChart3, Droplets, Terminal } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -8,31 +8,33 @@ export function Navigation() {
   const pathname = usePathname();
   
   const tabs = [
-    { id: '/', label: 'SWAP', icon: ArrowLeftRight },
-    { id: '/liquidity', label: 'LIQUIDITY', icon: Droplets },
-    { id: '/futures', label: 'FUTURES', icon: BarChart3 },
-    { id: '/ai', label: 'AI CMD', icon: Terminal },
+    { id: '/', label: 'Swap', icon: ArrowLeftRight },
+    { id: '/liquidity', label: 'Liquidity', icon: Droplets },
+    { id: '/futures', label: 'Futures', icon: BarChart3 },
+    { id: '/ai', label: 'AI Commands', icon: Terminal },
   ];
   
   return (
-    <nav className="flex items-center justify-center gap-2 p-2 bg-zinc-900/50 rounded-xl border border-cyan-500/20 backdrop-blur-sm">
-      {tabs.map(({ id, label, icon: Icon }) => {
-        const isActive = pathname === id;
-        return (
-          <Link
-            key={id}
-            href={id}
-            className={`flex items-center gap-2 px-6 py-3 rounded-lg font-mono font-bold text-sm transition-all ${
-              isActive
-                ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500 shadow-lg shadow-cyan-500/20'
-                : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 border border-transparent'
-            }`}
-          >
-            <Icon className="w-4 h-4" />
-            {label}
-          </Link>
-        );
-      })}
+    <nav className="flex items-center justify-center">
+      <div className="flex items-center gap-1 p-1 bg-[var(--bg-secondary)] rounded-xl border border-[var(--border-subtle)]">
+        {tabs.map(({ id, label, icon: Icon }) => {
+          const isActive = pathname === id;
+          return (
+            <Link
+              key={id}
+              href={id}
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                isActive
+                  ? 'bg-[var(--accent)] text-white'
+                  : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)]'
+              }`}
+            >
+              <Icon className="w-4 h-4" />
+              <span className="hidden sm:inline">{label}</span>
+            </Link>
+          );
+        })}
+      </div>
     </nav>
   );
 }
@@ -41,23 +43,27 @@ export function Header() {
   return (
     <header className="flex flex-col items-center gap-4 mb-8">
       <div className="flex items-center gap-3">
-        <div className="p-3 bg-cyan-500/20 rounded-xl border border-cyan-500/30">
-          <Zap className="w-8 h-8 text-cyan-400" />
+        <div className="w-10 h-10 rounded-xl bg-[var(--accent-muted)] flex items-center justify-center">
+          <svg className="w-6 h-6 text-[var(--accent)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M12 2L2 7l10 5 10-5-10-5z" />
+            <path d="M2 17l10 5 10-5" />
+            <path d="M2 12l10 5 10-5" />
+          </svg>
         </div>
         <div>
-          <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-green-400 font-mono">
-            CYBER TERMINAL
+          <h1 className="text-2xl font-semibold text-[var(--text-primary)]">
+            DeFi Terminal
           </h1>
-          <p className="text-sm text-zinc-500 font-mono">
-            Web3 Trading Interface • Sepolia Testnet
+          <p className="text-sm text-[var(--text-muted)]">
+            Trading Interface • Sepolia Testnet
           </p>
         </div>
       </div>
       
-      <div className="flex items-center gap-2 px-3 py-1 bg-yellow-500/10 border border-yellow-500/30 rounded-full">
-        <span className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse" />
-        <span className="text-xs text-yellow-500 font-mono">
-          TESTNET MODE • Chain ID: 11155111
+      <div className="flex items-center gap-2 px-3 py-1.5 bg-[var(--warning-muted)] rounded-full">
+        <span className="w-2 h-2 bg-[var(--warning)] rounded-full animate-pulse" />
+        <span className="text-xs text-[var(--warning)] font-medium">
+          Testnet Mode
         </span>
       </div>
     </header>
