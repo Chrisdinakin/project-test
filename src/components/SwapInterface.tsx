@@ -121,6 +121,11 @@ export function SwapInterface() {
       toast.error('Please enter a valid amount');
       return;
     }
+
+    if (!swapForm.toAmount || parseFloat(swapForm.toAmount) <= 0) {
+      toast.error('Output amount unavailable. Check liquidity and amount.');
+      return;
+    }
     
     if (!reserves || reserves[0] === BigInt(0) || reserves[1] === BigInt(0)) {
       toast.error('No liquidity in pool. Please add liquidity first.');

@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowLeftRight, BarChart3, Terminal, Zap } from 'lucide-react';
+import { ArrowLeftRight, BarChart3, Droplets, Terminal, Zap } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -9,6 +9,7 @@ export function Navigation() {
   
   const tabs = [
     { id: '/', label: 'SWAP', icon: ArrowLeftRight },
+    { id: '/liquidity', label: 'LIQUIDITY', icon: Droplets },
     { id: '/futures', label: 'FUTURES', icon: BarChart3 },
     { id: '/ai', label: 'AI CMD', icon: Terminal },
   ];
