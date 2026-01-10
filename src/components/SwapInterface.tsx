@@ -45,10 +45,6 @@ export function SwapInterface() {
     hash,
   });
   
-  const { swapForm, setSwapForm } = useTradingStore();
-  const [isSwapping, setIsSwapping] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
-  
   // Calculate output amount based on reserves (constant product formula)
   useEffect(() => {
     if (swapForm.fromAmount && !isNaN(parseFloat(swapForm.fromAmount)) && reserves) {
