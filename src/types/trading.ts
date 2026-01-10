@@ -10,7 +10,7 @@ export interface SwapFormState {
 }
 
 export interface FuturesFormState {
-  asset: 'ETH' | 'BTC';
+  asset: 'ETH' | 'BTC' | 'BNB' | 'SOL' | 'XRP' | 'ADA' | 'DOGE' | 'TRX' | 'TON' | 'LINK';
   position: 'long' | 'short';
   leverage: number;
   size: string;

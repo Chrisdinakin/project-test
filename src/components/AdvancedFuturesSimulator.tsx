@@ -6,6 +6,7 @@ import { useAccount, useSignMessage } from 'wagmi';
 import toast from 'react-hot-toast';
 import { useTradingStore } from '@/hooks/useTradingStore';
 import type { PriceData } from '@/types/trading';
+import { TOP_COINS } from '@/config/markets';
 import type { 
   IChartApi, 
   ISeriesApi, 
@@ -67,6 +68,7 @@ export function AdvancedFuturesSimulator() {
   const [chartType, setChartType] = useState<'candlestick' | 'line' | 'area'>('candlestick');
   const [showVolume, setShowVolume] = useState(true);
   const [showMA, setShowMA] = useState(false);
+  const [showMA50, setShowMA50] = useState(false);
   const [priceChange, setPriceChange] = useState<number>(0);
   
   const chartContainerRef = useRef<HTMLDivElement>(null);
@@ -83,7 +85,8 @@ export function AdvancedFuturesSimulator() {
       const timeoutId = setTimeout(() => controller.abort(), COINGECKO_API_TIMEOUT_MS);
       
       try {
-        const coinId = futuresForm.asset === 'ETH' ? 'ethereum' : 'bitcoin';
+        const coin = TOP_COINS.find(c => c.symbol === futuresForm.asset) || TOP_COINS.find(c => c.symbol === 'ETH')!;
+        const coinId = coin.id;
         const response = await fetch(
           `https://api.coingecko.com/api/v3/coins/${coinId}/ohlc?vs_currency=usd&days=${selectedTimeframe.days}`,
           { signal: controller.signal }
@@ -250,6 +253,14 @@ export function AdvancedFuturesSimulator() {
         maSeries.setData(maData);
         maSeriesRef.current = maSeries;
       }
+      if (showMA50) {
+        const ma50Series = chart.addSeries(LineSeries, {
+          color: '#a855f7',
+          lineWidth: 1,
+        } as LineSeriesPartialOptions);
+        const ma50Data = calculateMA(priceData, 50);
+        ma50Series.setData(ma50Data);
+      }
       
       chart.timeScale().fitContent();
       chartRef.current = chart;
@@ -272,7 +283,7 @@ export function AdvancedFuturesSimulator() {
         chartRef.current = null;
       }
     };
-  }, [priceData, volumeData, isChartLoading, chartType, showVolume, showMA]);
+  }, [priceData, volumeData, isChartLoading, chartType, showVolume, showMA, showMA50]);
   
   const handleOpenPosition = async (position: 'long' | 'short') => {
     if (!isConnected) {
@@ -367,18 +378,18 @@ Entry Price: $${currentPrice?.toLocaleString() || 'N/A'}`,
         
         {/* Asset & Timeframe Selectors */}
         <div className="flex flex-wrap gap-4 mb-4">
-          <div className="flex gap-2">
-            {(['ETH', 'BTC'] as const).map((asset) => (
+          <div className="flex gap-2 overflow-x-auto max-w-full">
+            {TOP_COINS.map((c) => (
               <button
-                key={asset}
-                onClick={() => setFuturesForm({ asset })}
+                key={c.symbol}
+                onClick={() => setFuturesForm({ asset: c.symbol as any })}
                 className={`px-4 py-2 rounded-lg font-mono font-bold transition-all ${
-                  futuresForm.asset === asset
+                  futuresForm.asset === c.symbol
                     ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500'
                     : 'bg-zinc-800 text-zinc-400 border border-zinc-700 hover:border-zinc-500'
                 }`}
               >
-                {asset}
+                {c.symbol}
               </button>
             ))}
           </div>
@@ -435,6 +446,16 @@ Entry Price: $${currentPrice?.toLocaleString() || 'N/A'}`,
             }`}
           >
             MA(20)
+          </button>
+          <button
+            onClick={() => setShowMA50(!showMA50)}
+            className={`px-3 py-1 rounded text-sm font-mono transition-all ${
+              showMA50
+                ? 'bg-purple-500/20 text-purple-400 border border-purple-500'
+                : 'bg-zinc-800 text-zinc-400 border border-zinc-700 hover:border-zinc-500'
+            }`}
+          >
+            MA(50)
           </button>
         </div>
         
@@ -587,10 +608,10 @@ function calculateMA(data: PriceData[], period: number) {
 }
 
 // Generate mock price data as fallback
-function generateMockPriceData(asset: 'ETH' | 'BTC'): PriceData[] {
+function generateMockPriceData(asset: string): PriceData[] {
   const { ETH_BASE_PRICE, BTC_BASE_PRICE, VOLATILITY_FACTOR, MIN_PRICE_RATIO, CHART_HOURS } = MOCK_DATA_CONFIG;
   
-  const basePrice = asset === 'ETH' ? ETH_BASE_PRICE : BTC_BASE_PRICE;
+  const basePrice = asset === 'BTC' ? BTC_BASE_PRICE : ETH_BASE_PRICE;
   const data: PriceData[] = [];
   const now = Math.floor(Date.now() / 1000);
   const hourInSeconds = 3600;
