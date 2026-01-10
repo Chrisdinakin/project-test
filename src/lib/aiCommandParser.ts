@@ -57,8 +57,8 @@ function parseSwapCommand(command: string): AICommandResult {
       
       if (!isNaN(amount) && fromToken && toToken && fromToken !== toToken) {
         const swapData: Partial<SwapFormState> = {
-          fromToken: fromToken as 'ETH' | 'USDC',
-          toToken: toToken as 'ETH' | 'USDC',
+          fromToken,
+          toToken,
           fromAmount: amount.toString(),
         };
         
@@ -147,13 +147,15 @@ function parseFuturesCommand(command: string): AICommandResult {
   };
 }
 
-function normalizeToken(token: string): 'ETH' | 'USDC' | null {
+function normalizeToken(token: string): 'TKA' | 'TKB' | null {
   const normalized = token.toLowerCase().replace(/\s+/g, '');
-  if (normalized === 'eth' || normalized === 'sepoliaeth') {
-    return 'ETH';
+
+  // Map legacy prompts (eth/usdc) to the current deployed tokens (TKA/TKB)
+  if (['eth', 'sepoliaeth', 'tka', 'tokena'].includes(normalized)) {
+    return 'TKA';
   }
-  if (normalized === 'usdc') {
-    return 'USDC';
+  if (['usdc', 'tkb', 'tokenb'].includes(normalized)) {
+    return 'TKB';
   }
   return null;
 }
@@ -177,8 +179,8 @@ export function generateAIResponse(result: AICommandResult): string {
   if (result.action === 'swap' && result.swapData) {
     const { fromToken, toToken, fromAmount } = result.swapData;
     return `✅ I've populated the swap form:\n` +
-           `• From: ${fromAmount || '0'} ${fromToken || 'ETH'}\n` +
-           `• To: ${toToken || 'USDC'}\n\n` +
+           `• From: ${fromAmount || '0'} ${fromToken || 'TKA'}\n` +
+           `• To: ${toToken || 'TKB'}\n\n` +
            `Switch to the Swap tab to review and execute the transaction.`;
   }
   
