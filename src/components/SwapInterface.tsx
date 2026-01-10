@@ -16,6 +16,7 @@ export function SwapInterface() {
   const { swapForm, setSwapForm } = useTradingStore();
   const [isSwapping, setIsSwapping] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [lastAction, setLastAction] = useState<'approve' | 'swap' | null>(null);
   
   // Read contract hooks
   const { data: reserves } = useReadContract({
@@ -98,6 +99,7 @@ export function SwapInterface() {
     const amount = parseEther(swapForm.fromAmount);
     
     try {
+      setLastAction('approve');
       writeContract({
         address: tokenAddress,
         abi: MOCK_TOKEN_ABI,
@@ -139,6 +141,7 @@ export function SwapInterface() {
       const amountIn = parseEther(swapForm.fromAmount);
       const minAmountOut = parseEther(swapForm.toAmount);
       
+      setLastAction('swap');
       writeContract({
         address: DEPLOYED_CONTRACTS.SIMPLE_SWAP,
         abi: SIMPLE_SWAP_ABI,
@@ -157,7 +160,13 @@ export function SwapInterface() {
   
   // Show success message when transaction is confirmed
   useEffect(() => {
-    if (isConfirmed) {
+    if (!isConfirmed) return;
+    if (lastAction === 'approve') {
+      toast.success('Approval confirmed');
+      setLastAction(null);
+      return;
+    }
+    if (lastAction === 'swap') {
       toast.custom((t) => (
         <div
           className={`${
@@ -171,7 +180,7 @@ export function SwapInterface() {
               </div>
               <div className="ml-3 flex-1">
                 <p className="text-sm font-medium text-cyan-400">
-                  Transaction Confirmed!
+                  Swap Confirmed!
                 </p>
                 <p className="mt-1 text-sm text-zinc-400">
                   {swapForm.fromAmount} {swapForm.fromToken} → {swapForm.toAmount} {swapForm.toToken}
@@ -181,10 +190,10 @@ export function SwapInterface() {
           </div>
         </div>
       ), { duration: 5000 });
-      
       setSwapForm({ fromAmount: '', toAmount: '' });
+      setLastAction(null);
     }
-  }, [isConfirmed, swapForm.fromAmount, swapForm.fromToken, swapForm.toAmount, swapForm.toToken, setSwapForm]);
+  }, [isConfirmed, lastAction, swapForm.fromAmount, swapForm.fromToken, swapForm.toAmount, swapForm.toToken, setSwapForm]);
   
   return (
     <div className="w-full max-w-md mx-auto">
@@ -252,6 +261,9 @@ export function SwapInterface() {
               type="number"
               placeholder="0.0"
               value={swapForm.fromAmount}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') e.preventDefault();
+              }}
               onChange={(e) => setSwapForm({ fromAmount: e.target.value })}
               className="flex-1 bg-transparent text-2xl text-white font-mono outline-none"
             />
@@ -369,6 +381,7 @@ export function SwapInterface() {
           <button
             onClick={handleApprove}
             disabled={isPending || isConfirming || !isConnected || !swapForm.fromAmount}
+            type="button"
             className={`flex-1 py-3 rounded-lg font-bold font-mono transition-all ${
               isConnected && swapForm.fromAmount
                 ? 'bg-cyan-600 hover:bg-cyan-500 text-white'
@@ -387,6 +400,7 @@ export function SwapInterface() {
           <button
             onClick={handleSwap}
             disabled={isSwapping || isPending || isConfirming || !isConnected || !swapForm.fromAmount}
+            type="button"
             className={`flex-1 py-3 rounded-lg font-bold font-mono transition-all ${
               isConnected && swapForm.fromAmount && reserves && reserves[0] > BigInt(0)
                 ? 'bg-gradient-to-r from-cyan-500 to-green-500 hover:from-cyan-400 hover:to-green-400 text-black'
