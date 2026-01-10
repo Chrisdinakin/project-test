@@ -55,10 +55,10 @@ export function AddLiquidity() {
   const { data: txHash, isPending, writeContract } = useWriteContract();
   const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({ hash: txHash });
 
-  const allowanceA = (allowanceAData as bigint | undefined) ?? 0n;
-  const allowanceB = (allowanceBData as bigint | undefined) ?? 0n;
-  const balanceA = (balanceAData as bigint | undefined) ?? 0n;
-  const balanceB = (balanceBData as bigint | undefined) ?? 0n;
+  const allowanceA = (allowanceAData as bigint | undefined) ?? BigInt(0);
+  const allowanceB = (allowanceBData as bigint | undefined) ?? BigInt(0);
+  const balanceA = (balanceAData as bigint | undefined) ?? BigInt(0);
+  const balanceB = (balanceBData as bigint | undefined) ?? BigInt(0);
   const poolReserves = reserves as [bigint, bigint] | undefined;
 
   const amountAWei = useMemo(() => {
